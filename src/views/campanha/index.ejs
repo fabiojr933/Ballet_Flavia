@@ -251,19 +251,22 @@
 
   </main>
 
-<div class="modal fade" id="newCampaignModal" tabindex="-1">
+  <div class="modal fade" id="newCampaignModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
       
-      <!-- Header do Modal integrado ao NiceAdmin -->
       <div class="modal-header border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
         <div>
           <h4 class="modal-title fw-bold text-primary">Nova Campanha</h4>
           <p class="text-muted small mb-0">Configure o disparo em massa para seus contatos.</p>
         </div>
-        <div class="device-status-badge d-flex align-items-center client-status-connected">
-          <span class="status-dot me-2"></span>
-          <span class="small fw-semibold text-success">WhatsApp conectado</span>
+        
+        <div class="d-flex align-items-center gap-3">
+          <div class="device-status-badge d-flex align-items-center client-status-connected">
+            <span class="status-dot me-2"></span>
+            <span class="small fw-semibold text-success">WhatsApp conectado</span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px; color: #899bbd; background: none; border: none; line-height: 1;">&times;</button>
         </div>
       </div>
 
@@ -271,9 +274,7 @@
         <form action="/campanha" method="post">
           <div class="row g-4">
             
-            <!-- Coluna da Esquerda (Formulários) -->
             <div class="col-lg-7">
-              <!-- Bloco 1: Dados da Campanha -->
               <div class="card border-0 shadow-sm mb-3 bg-light">
                 <div class="card-body p-3">
                   <div class="mb-3">
@@ -282,7 +283,7 @@
                   </div>
                   <div>
                     <label class="form-label fw-bold text-secondary small">MENSAGEM DO WHATSAPP</label>
-                   <textarea
+                    <textarea
                       class="form-control"
                       rows="4"
                       placeholder="Olá {{nome}}, temos uma oferta especial para você..."
@@ -292,7 +293,6 @@
                 </div>
               </div>
 
-              <!-- Bloco 2: Opções de Envio -->
               <div class="card border-0 shadow-sm bg-light">
                 <div class="card-body p-3">
                   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -321,7 +321,6 @@
               </div>
             </div>
 
-            <!-- Coluna da Direita (Agendamento) -->
             <div class="col-lg-5">
               <div class="card border-0 bg-primary-light h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -338,7 +337,6 @@
                       <input type="time" class="form-control" name="hora_agendamento" required>
                     </div>
 
-                    <!-- Box de Estimativa de Contatos -->
                     <div class="estimate-box bg-white p-3 rounded shadow-sm mb-4 text-center">
                       <span class="text-muted small d-block fw-bold mb-1">TOTAL CONTATOS</span>
                       <h2 class="text-primary fw-bold mb-0"><%= total %></h2>
