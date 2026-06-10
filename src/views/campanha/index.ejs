@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  body { background: #f6f9ff; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .page-title h2 { font-size: 26px; font-weight: 700; color: #012970; margin-bottom: 5px; }
+  .page-title p { margin: 0; color: #899bbd; font-size: 14px; }
+  .header-actions { display: flex; gap: 12px; }
+  
+  .btn-report { border: 1px solid #dce1f1; background: #fff; color: #52607a; padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+  .btn-new { border: none; background: #4154f1; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: .3s; }
+  .btn-new:hover { background: #5969f3; }
+
+  .campaign-table { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 0 20px rgba(1, 41, 112, 0.08); }
+  .table { margin: 0; vertical-align: middle; }
+  .table thead th { border: none; padding: 15px 24px; font-size: 12px; color: #899bbd; font-weight: 700; letter-spacing: 1px; background: #fff; }
+  
+ 
+  .campaign-name { display: flex; align-items: center; gap: 12px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dot-warning { background: #ff9800; }
+  .dot-success { background: #2eca6a; }
+  .dot-danger { background: #dc3545; }
+
+  .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+  .badge-pending { background-color: #fff3cd; color: #856404; }
+  .badge-sent { background-color: #d4edda; color: #155724; }
+  .badge-canceled { background-color: #f8d7da; color: #721c24; }
+  .badge-default { background-color: #e2e3e5; color: #383d41; }
+
+  .action-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: #f6f9ff; color: #4154f1; transition: .3s; display: flex; align-items: center; justify-content: center; }
+  .action-btn:hover { background: #4154f1; color: #fff; }
+
+  /* Ajuste do Modal de Detalhes */
+  .details-modal .modal-content { border-radius: 20px; border: none; }
+  .details-header { padding: 20px 24px; border-bottom: 1px solid #eef1f7; display: flex; justify-content: space-between; align-items: flex-start; }
+  .details-left { display: flex; gap: 12px; align-items: flex-start; }
+  .details-icon { width: 44px; height: 44px; border-radius: 12px; background: #f6f9ff; color: #4154f1; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .details-title h4 { font-size: 18px; font-weight: 700; color: #012970; margin-bottom: 4px; }
+  .close-modal-btn { background: transparent; border: none; font-size: 24px; color: #899bbd; line-height: 1; }
+  .details-body { padding: 24px; }
+  .message-box { background: #f8f9fa; border-radius: 12px; padding: 18px; font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 20px; border: 1px solid #e9ecef; }
+  .info-box { background: #fff; border: 1px solid #eef1f7; border-radius: 12px; padding: 15px; height: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  .info-box h5 { margin: 0; font-size: 16px; font-weight: 700; color: #012970; display: flex; align-items: center; gap: 8px; }
+  .details-label { font-size: 11px; font-weight: 700; color: #899bbd; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .details-footer { margin-top: 24px; display: flex; gap: 12px; }
+  .btn-details { padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; border: none; flex: 1; transition: 0.2s; }
+  .btn-gray { background: #f1f3f8; color: #52607a; }
+  .btn-danger-custom { background: #dc3545; color: #fff; }
+  .btn-danger-custom:hover { background: #bb2d3b; }
+
+  /* Cores utilitárias que combinam com o NiceAdmin */
+.bg-light {
+  background-color: #f6f9ff !important; /* Cinza claro azulado do NiceAdmin */
+}
+
+.bg-primary-light {
+  background-color: #e0ecff !important; /* Fundo azul bem suave para o agendamento */
+}
+
+.bg-success-light {
+  background-color: #e3f7fc;
+  color: #1f75cb;
+}
+
+/* Status do WhatsApp */
+.device-status-badge {
+  background-color: #e5f7ed;
+  padding: 6px 12px;
+  border-radius: 30px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #2eca6a;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+/* Efeito de piscar no status verde */
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 202, 106, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 202, 106, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 202, 106, 0); }
+}
+
+/* Customizações dos inputs dentro do modal */
+#newCampaignModal .form-control, 
+#newCampaignModal .form-select {
+  border: 1px solid #ced4da;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+}
+
+#newCampaignModal .form-control:focus, 
+#newCampaignModal .form-select:focus {
+  border-color: #4154f1;
+  box-shadow: 0 0 0 0.25px rgba(65, 84, 241, 0.25);
+}
+
+.style-info-text {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+
+/* Mobile */
+@media (max-width: 768px) {
+
+  .campaign-table {
+    overflow: hidden;
+  }
+
+  .table-responsive {
+    border-radius: 12px;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+
+  .table thead th {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .table tbody td {
+    
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .campaign-name {
+    min-width: 180px;
+  }
+
+  .badge-status {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 768px) {
+
+  /* Esconde destinatários e agendamento */
+  .table th:nth-child(3),
+  .table td:nth-child(3),
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+      display: none;
+  }
+
+  .campaign-name {
+      min-width: auto;
+  }
+}
+
+
+</style>
+
+<body>
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+<main id="main" class="main d-flex flex-column" style="min-height: calc(100vh - 100px);">
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Campanhas</h2>
+        <p>Gerencie seus disparos agendados e enviados.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-new" data-bs-toggle="modal" data-bs-target="#newCampaignModal">Nova Campanha</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>CAMPANHA</th>
+            <th>REPETE</th>
+            <th>STATUS</th>
+            <th>DESTINATÁRIOS</th>
+            <th>AGENDAMENTO</th>
+            <th class="text-center">AÇÕES</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <% if (typeof companha !== 'undefined' && companha.length > 0) { %>
+            <% companha.forEach(campanhas => { %>
+              <tr>
+                <td>
+                  <div class="campaign-name">
+                    <div class="dot <%= campanhas.status === 'ENVIADO' ? 'dot-success' : (campanhas.status === 'CANCELADO' ? 'dot-danger' : 'dot-warning') %>"></div>
+                    <%= campanhas.nome %>
+                  </div>
+                </td>
+                <td>
+                <div class="campaign-name">
+                  <%= campanhas.repete %>
+                </div>
+              </td>
+                <td>
+                  <span class="badge-status <%= 
+                    campanhas.status === 'PENDENTE' ? 'badge-pending' : 
+                    campanhas.status === 'ENVIADO' ? 'badge-sent' : 
+                    campanhas.status === 'CANCELADO' ? 'badge-canceled' : 'badge-default' 
+                  %>">
+                    <%= campanhas.status %>
+                  </span>
+                </td>
+                <td><%= total %> contatos</td>
+                <td>
+                  <i class="bi bi-calendar3"></i> 
+                  <%= new Date(campanhas.proxima_execucao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) %> às 
+                  <%= new Date(campanhas.proxima_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> horas
+                </td>
+                <td class="text-center">
+                  <button class="action-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#detailsModal"
+                    data-id="<%= campanhas.id %>"
+                    data-nome="<%= campanhas.nome %>"
+                    data-status="<%= campanhas.status %>"
+                    data-mensagem="<%= campanhas.mensagem %>"
+                    data-data="<%= campanhas.proxima_execucao %>">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="text-center text-muted py-5">
+                <p class="mb-0">Nenhuma campanha cadastrada.</p>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+<div class="modal fade" id="newCampaignModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      
+      <!-- Header do Modal integrado ao NiceAdmin -->
+      <div class="modal-header border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+        <div>
+          <h4 class="modal-title fw-bold text-primary">Nova Campanha</h4>
+          <p class="text-muted small mb-0">Configure o disparo em massa para seus contatos.</p>
+        </div>
+        <div class="device-status-badge d-flex align-items-center client-status-connected">
+          <span class="status-dot me-2"></span>
+          <span class="small fw-semibold text-success">WhatsApp conectado</span>
+        </div>
+      </div>
+
+      <div class="modal-body p-4">
+        <form action="/campanha" method="post">
+          <div class="row g-4">
+            
+            <!-- Coluna da Esquerda (Formulários) -->
+            <div class="col-lg-7">
+              <!-- Bloco 1: Dados da Campanha -->
+              <div class="card border-0 shadow-sm mb-3 bg-light">
+                <div class="card-body p-3">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold text-secondary small">NOME DA CAMPANHA</label>
+                    <input type="text" class="form-control" placeholder="Ex: Promoção de Natal 2026" name="nome" required>
+                  </div>
+                  <div>
+                    <label class="form-label fw-bold text-secondary small">MENSAGEM DO WHATSAPP</label>
+                   <textarea
+                      class="form-control"
+                      rows="4"
+                      placeholder="Olá {{nome}}, temos uma oferta especial para você..."
+                      name="mensagem"
+                      required><%= config.mensagem_lembrete_horario || '' %></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bloco 2: Opções de Envio -->
+              <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="m-0 fw-bold text-secondary small">OPÇÕES DE ENVIO</h6>
+                    <span class="badge bg-success-light text-success fw-bold">OTIMIZADO</span>
+                  </div>
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <label class="form-label text-muted small">Repete</label>
+                      <select class="form-select" name="repete" required>
+                        <option value="NAO">Não</option>
+                        <option value="DIARIO">Diário</option>
+                        <option value="SEMANAL">Semanal</option>
+                        <option value="MENSAL">Mensal</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label text-muted small">FILTRO DE CONTATOS</label>
+                      <select class="form-select" name="enviar_todos" required>
+                        <option value="1">Todos os contatos</option>
+                        <option value="2">Contatos ativos</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna da Direita (Agendamento) -->
+            <div class="col-lg-5">
+              <div class="card border-0 bg-primary-light h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                  <div>
+                    <h5 class="fw-bold text-primary mb-3">AGENDAMENTO</h5>
+                    
+                    <div class="mb-3">
+                      <label class="form-label text-secondary small fw-semibold">Próxima Execução</label>
+                      <input type="date" class="form-control" name="data_agendamento" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="form-label text-secondary small fw-semibold">HORA</label>
+                      <input type="time" class="form-control" name="hora_agendamento" required>
+                    </div>
+
+                    <!-- Box de Estimativa de Contatos -->
+                    <div class="estimate-box bg-white p-3 rounded shadow-sm mb-4 text-center">
+                      <span class="text-muted small d-block fw-bold mb-1">TOTAL CONTATOS</span>
+                      <h2 class="text-primary fw-bold mb-0"><%= total %></h2>
+                    </div>
+                  </div>
+
+                  <div>
+                    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm">
+                      <i class="bi bi-calendar-check me-2"></i>CONFIRMAR AGENDAMENTO
+                    </button>
+                    <div class="text-center text-muted small mt-2 style-info-text">
+                      Disparo automático via servidor central.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+  
+  <div class="modal fade details-modal" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content shadow-lg">
+        <div class="details-header">
+          <div class="details-left">
+            <div class="details-icon"><i class="bi bi- megaphone"></i></div>
+            <div class="details-title">
+              <h4 id="modal-nome">Carregando...</h4>
+              <span id="modal-status-badge" class="badge-status">---</span>
+            </div>
+          </div>
+          <button class="close-modal-btn" data-bs-dismiss="modal">&times;</button>
+        </div>
+        <div class="details-body">
+          <div class="details-label">Conteúdo da Mensagem</div>
+          <div class="message-box" id="modal-mensagem">---</div>
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="details-label">Data do Disparo</div>
+                <h5 id="modal-data"><i class="bi bi-calendar-check"></i> ---</h5>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="details-label">Público Alvo</div>
+                <h5><i class="bi bi-people"></i> <%= total %> contatos registrados</h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px; flex: 1; padding: 10px;">
+                Fechar
+            </button>
+
+            <a id="lnkCancelarCampanha" href="#" class="btn btn-warning btn-sm" style="border-radius: 8px; flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center;">
+                Cancelar Disparo
+            </a>
+
+            <a id="lnkExcluirCampanha" href="#" class="btn btn-danger btn-sm" style="border-radius: 8px; flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center;">
+                Excluir Campanha
+            </a>
+        </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+  const detailsModal = document.getElementById('detailsModal');
+  if (detailsModal) {
+    detailsModal.addEventListener('show.bs.modal', event => {
+      const button = event.relatedTarget;
+      
+      // Captura o ID e outros dados do botão que foi clicado na tabela
+      const id = button.getAttribute('data-id'); 
+      const nome = button.getAttribute('data-nome');
+      const status = button.getAttribute('data-status');
+      const mensagem = button.getAttribute('data-mensagem');
+      const dataFull = button.getAttribute('data-data');
+
+      // PREENCHE OS LINKS (O que você pediu)
+      document.getElementById('lnkCancelarCampanha').href = `/campanha/cancelar/${id}`;
+      document.getElementById('lnkExcluirCampanha').href = `/campanha/excluir/${id}`;
+
+      // Preenchimento visual do Modal
+      document.getElementById('modal-nome').textContent = nome;
+      document.getElementById('modal-mensagem').textContent = mensagem;
+      
+      let dataExibicao = "Data não definida";
+      if (dataFull) {
+        const dataObj = new Date(dataFull);
+        const dataExtenso = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        dataExibicao = `${dataExtenso} às ${horaFormatada} horas`;
+      }
+      document.getElementById('modal-data').innerHTML = `<i class="bi bi-calendar3"></i> ${dataExibicao}`;
+      
+      const badge = document.getElementById('modal-status-badge');
+      badge.textContent = status;
+      badge.className = 'badge-status'; 
+      const statusClass = status === 'PENDENTE' ? 'badge-pending' : 
+                          status === 'ENVIADO' ? 'badge-sent' : 
+                          status === 'CANCELADO' ? 'badge-canceled' : 'badge-default';
+      badge.classList.add(statusClass);
+    });
+  }
+</script>
+
+</body>
+</html>

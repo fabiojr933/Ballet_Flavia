@@ -1,0 +1,54 @@
+/* Estilo Geral do Sidebar */
+.sidebar {
+    background-color: #0b0e1f !important;
+    /* Azul escuro da imagem */
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Links do Menu */
+.sidebar-nav .nav-link.collapsed {
+    background: transparent;
+    color: #a0aec0;
+    /* Cor cinza desativada */
+    font-weight: 500;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link i {
+    color: #a0aec0;
+    font-size: 1.1rem;
+}
+
+/* Item Ativo (Roxo igual a imagem) */
+.sidebar-nav .nav-link:not(.collapsed) {
+    background: #5a57e6 !important;
+    /* Cor roxa */
+    color: #fff !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(90, 87, 230, 0.3);
+}
+
+.sidebar-nav .nav-link:not(.collapsed) i,
+.sidebar-nav .nav-link:not(.collapsed) span {
+    color: #fff !important;
+}
+
+/* Efeito de Hover */
+.sidebar-nav .nav-link.collapsed:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.sidebar-nav .nav-link.collapsed:hover i {
+    color: #fff;
+}
+
+/* Ajuste para o rodapé do menu */
+.sidebar-footer .nav-link {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+}

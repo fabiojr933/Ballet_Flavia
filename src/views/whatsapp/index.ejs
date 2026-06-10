@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  body {
+    background: #f6f9ff;
+  }
+
+  .success-wrapper {
+    /* Ajustado para não empurrar o card muito para baixo */
+    padding: 40px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-card {
+    width: 100%;
+    max-width: 550px; /* Reduzido para ficar mais elegante */
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(1, 41, 112, 0.05);
+    border: 1px solid #ebeef4;
+  }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #f0f2ff;
+    color: #4154f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e7f9ee;
+    color: #2eca6a;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .status-badge i {
+    font-size: 8px;
+  }
+
+  .success-card h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #012970;
+    margin-bottom: 12px;
+  }
+
+  .success-card p {
+    font-size: 15px;
+    color: #798eb3;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .device-info {
+    background: #f8faff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 30px;
+  }
+
+  .device-info span {
+    display: block;
+    font-size: 11px;
+    color: #899bbd;
+    margin-bottom: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .device-info h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #012970;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .btn-dashboard {
+    background: #4154f1;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+
+  .btn-dashboard:hover {
+    background: #2a3ef1;
+    color: #fff;
+  }
+
+  .btn-campaign {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    color: #012970;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+
+  .btn-campaign:hover {
+    background: #f8f9fa;
+    border-color: #c1c9d0;
+  }
+
+  @media (max-width: 576px) {
+    .success-card {
+      padding: 30px 20px;
+    }
+    .action-buttons {
+      flex-direction: column;
+    }
+    .btn-dashboard, .btn-campaign {
+      justify-content: center;
+    }
+  }
+</style>
+
+<body>
+
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main">
+
+    <div class="success-wrapper">
+      <div class="success-card">
+
+        <div class="success-icon">
+          <i class="bi bi-whatsapp"></i>
+        </div>
+
+        <div class="status-badge">
+          <i class="bi bi-circle-fill"></i>
+          WhatsApp conectado com sucesso
+        </div>
+
+        <h1>Dispositivo conectado</h1>
+
+        <p>
+          Seu WhatsApp foi conectado com sucesso ao sistema. Agora você já pode criar campanhas e gerenciar seus disparos.
+        </p>
+
+        <div class="device-info">
+          <span>Dispositivo conectado</span>
+          <h5><%= dispositivo %></h5>
+        </div>
+
+        <div class="action-buttons">
+          <a href="/dashboard" class="btn btn-dashboard">
+            <i class="bi bi-grid-fill me-2"></i>
+            Ir para Dashboard
+          </a>
+          <a href="/campanha" class="btn btn-campaign">
+            <i class="bi bi-send-fill me-2"></i>
+            Nova Campanha
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+</body>
+</html>

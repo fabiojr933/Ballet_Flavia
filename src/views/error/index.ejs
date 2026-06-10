@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  .error-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6f9ff;
+  }
+  .error-card {
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(65, 84, 241, 0.1);
+    text-align: center;
+  }
+  .error-icon {
+    font-size: 80px;
+    color: #4154f1;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+  }
+  .error-code {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #012970;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .btn-back {
+    background: #4154f1;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  .btn-back:hover {
+    background: #2b3bb1;
+    color: #fff;
+    transform: scale(1.05);
+  }
+  .technical-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 25px;
+    text-align: left;
+    border-left: 4px solid #dc3545;
+  }
+</style>
+
+<body>
+  <div class="error-container p-3">
+    <div class="error-card">
+      <div class="error-icon">
+        <i class="bi bi-exclamation-octagon-fill"></i>
+      </div>
+      
+      <span class="error-code">Ops! Algo deu errado</span>
+      <h2 class="fw-bold text-dark mb-3">Tivemos um problema técnico</h2>
+      <p class="text-muted mb-4">
+        Não foi possível processar sua solicitação no momento. Nossa equipe já foi notificada para resolver isso o mais rápido possível.
+      </p>
+
+      <a href="/dashboard" class="btn-back shadow-sm">
+        <i class="bi bi-house-door me-2"></i> Voltar ao Painel
+      </a>
+
+      <% if (typeof errorMsg !== 'undefined') { %>
+        <div class="technical-details">
+          <strong>Detalhe para o suporte:</strong><br>
+          <%= errorMsg %>
+        </div>
+      <% } %>
+      
+      <div class="mt-4">
+        <p class="small text-muted mb-0">Precisa de ajuda urgente? <a href="#" class="text-primary fw-bold">Contate o Suporte</a></p>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/script.ejs') %>
+</body>
+</html>

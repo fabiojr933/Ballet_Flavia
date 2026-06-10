@@ -1,0 +1,30 @@
+<!-- Vendor JS Files -->
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="/assets/js/main.js"></script>
+
+<script>
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 5000,
+    timerProgressBar: true
+  });
+
+  <% if (typeof messages !== 'undefined' && messages.info) { %>
+    Toast.fire({
+      icon: 'success',
+      title: '<%= messages.info %>'
+    });
+  <% } %>
+
+  <% if (typeof messages !== 'undefined' && messages.error) { %>
+    Toast.fire({
+      icon: 'error',
+      title: '<%= messages.error %>'
+    });
+  <% } %>
+</script>

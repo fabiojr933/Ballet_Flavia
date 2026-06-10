@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  body { background: #f6f9ff; }
+
+  /* Títulos */
+  .dashboard-title h2 { font-size: 24px; font-weight: 700; color: #012970; margin-bottom: 2px; }
+  .dashboard-title p { color: #899bbd; font-size: 13px; margin-bottom: 20px; }
+
+  /* Barra de Busca e Legenda */
+  .search-header {
+    background: #fff;
+    border-radius: 50px;
+    padding: 10px 25px;
+    box-shadow: 0 0 20px rgba(1, 41, 112, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  .search-input-group { display: flex; align-items: center; flex-grow: 1; }
+  .search-input-group input { border: none; outline: none; width: 100%; margin-left: 10px; font-size: 14px; color: #899bbd; }
+  
+  .legend { display: flex; gap: 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ESTILIZAÇÃO DOS BOTÕES DE FILTRO DE TURMA */
+  .class-filter-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .btn-filter-class {
+    background: #fff;
+    color: #798eb3;
+    border: 2px solid #e0e6ed;
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-filter-class:hover {
+    background: #f0f4ff;
+    color: #4154f1;
+    border-color: #bcd0ff;
+  }
+
+  .btn-filter-class.active {
+    background: #4154f1;
+    color: #fff;
+    border-color: #4154f1;
+    box-shadow: 0 8px 20px rgba(65, 84, 241, 0.2);
+  }
+
+  /* Controle de Visibilidade das Turmas */
+  .panel-section {
+    display: none;
+  }
+  
+  .panel-section.active-section {
+    display: block;
+  }
+
+  /* Card da Aluna */
+  .performance-card {
+    background: #fff;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 0 25px rgba(1, 41, 112, 0.08);
+    margin-bottom: 20px;
+    position: relative;
+    border: none;
+  }
+
+  .card-header-info { display: flex; justify-content: space-between; align-items: flex-start; }
+  .student-main { display: flex; align-items: center; gap: 15px; }
+  
+  .avatar-box {
+    width: 50px; height: 50px; background: #f0f4ff; color: #4154f1;
+    border-radius: 15px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+  }
+
+  .name-zone h4 { font-size: 18px; font-weight: 800; color: #012970; margin: 0; }
+  .name-zone span { font-size: 10px; font-weight: 700; color: #4154f1; text-transform: uppercase; letter-spacing: 1px; }
+
+  .percentage-zone { text-align: right; }
+  .percentage-zone h3 { font-size: 24px; font-weight: 900; color: #4154f1; margin: 0; }
+  .percentage-zone span { font-size: 9px; font-weight: 700; color: #899bbd; text-transform: uppercase; }
+
+  /* Divisor Colorido */
+  .purple-divider {
+    height: 6px; background: #717ff5; border-radius: 10px; margin: 20px 0; opacity: 0.8;
+  }
+
+  /* Mini Cards de Status */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  .stat-box {
+    border-radius: 15px; padding: 15px; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .bg-presenca { background: #f0fff4; color: #2ecc71; }
+  .bg-falta { background: #fff5f5; color: #e74c3c; }
+
+  .stat-box .num { font-size: 20px; font-weight: 800; }
+  .stat-box .lab { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+
+  /* Footer do Card */
+  .card-footer-custom {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid #f0f4fb; margin-top: 10px; padding-top: 15px;
+  }
+  .total-aulas { font-size: 10px; font-weight: 700; color: #899bbd; text-transform: uppercase; }
+  .badge-destaque { font-size: 10px; font-weight: 700; color: #2ecc71; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+
+  /* Botão Plus */
+  .btn-plus-float {
+    position: absolute; right: 25px; top: 25px;
+    background: #4154f1; color: #fff; width: 40px; height: 40px;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(65, 84, 241, 0.3); z-index: 10;
+  }
+
+  @media (max-width: 576px) {
+    .class-filter-container { flex-direction: column; gap: 8px; }
+  }
+</style>
+
+<body>
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main" style="position: relative;">
+    
+    <a href="/chamada" class="btn-plus-float">
+      <i class="bi bi-plus-lg"></i>
+    </a>
+
+    <div class="dashboard-title">
+      <h2>Painel de Controle</h2>
+      <p>Equipe de Ballet • Indicadores de Desempenho</p>
+    </div>
+
+    <div class="search-header">
+      <div class="search-input-group">
+        <i class="bi bi-search text-primary"></i>
+        <input type="text" id="input-search" placeholder="Buscar aluna para ver desempenho...">
+      </div>
+      <div class="legend d-none d-md-flex">
+        <div class="legend-item"><span class="dot" style="background: #2ecc71;"></span> PRESENÇA</div>
+        <div class="legend-item"><span class="dot" style="background: #e74c3c;"></span> FALTA</div>
+      </div>
+    </div>
+
+    <% 
+      // 1. Captura segura dos dados estruturados vindos do controller
+      let arrayChamadas = [];
+      let totalAulasGeral = 0;
+
+      if (typeof chamadas !== 'undefined') {
+        arrayChamadas = chamadas;
+      } else if (typeof dados !== 'undefined' && dados.chamadas) {
+        arrayChamadas = dados.chamadas;
+      }
+
+      if (typeof total !== 'undefined' && total.total_aulas) {
+        totalAulasGeral = parseInt(total.total_aulas) || 0;
+      } else if (typeof dados !== 'undefined' && dados.total && dados.total.total_aulas) {
+        totalAulasGeral = parseInt(dados.total.total_aulas) || 0;
+      }
+
+      // 2. Consolidação: Agrupar e somar os registros repetidos por Aluna
+      const alunasConsolidadas = {};
+
+      arrayChamadas.forEach(item => {
+        const chave = `${item.nome}-${item.turma}`;
+        if (!alunasConsolidadas[chave]) {
+          alunasConsolidadas[chave] = {
+            nome: item.nome,
+            turma: item.turma,
+            presencias: 0,
+            faltas: 0
+          };
+        }
+        
+        const qtd = parseInt(item.total) || 0;
+        if (item.status.toUpperCase() === 'PRESENTE') {
+          alunasConsolidadas[chave].presencias += qtd;
+        } else if (item.status.toUpperCase() === 'AUSENTE') {
+          alunasConsolidadas[chave].faltas += qtd;
+        }
+      });
+
+      // 3. Separar as alunas consolidadas por suas respectivas turmas
+      const turmaBabyList = [];
+      const turmaInfantilList = [];
+
+      Object.values(alunasConsolidadas).forEach(aluna => {
+        if (aluna.turma === '1') {
+          turmaBabyList.push(aluna);
+        } else {
+          turmaInfantilList.push(aluna);
+        }
+      });
+    %>
+
+    <div class="class-filter-container">
+      <button class="btn-filter-class active" data-target="panel-secao-baby">
+        <i class="bi bi-person-hearts"></i> Turma Baby (4/6 anos)
+      </button>
+      <button class="btn-filter-class" data-target="panel-secao-infantil">
+        <i class="bi bi-stars"></i> Turma Infantil (7/11 anos)
+      </button>
+    </div>
+
+
+    <div id="panel-secao-baby" class="panel-section active-section">
+      <div class="row">
+        <% if (turmaBabyList.length > 0) { 
+            turmaBabyList.forEach(aluna => {
+              let totalAulasAluna = aluna.presencias + aluna.faltas;
+              // Se o total geral de aulas da query for zero, usa o total somado dela para evitar divisão por zero
+              let divisor = totalAulasGeral > 0 ? totalAulasGeral : (totalAulasAluna > 0 ? totalAulasAluna : 1);
+              let aproveitamento = Math.round((aluna.presencias / divisor) * 100);
+              let iniciais = aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        %>
+          <div class="col-lg-6 card-item-container">
+            <div class="performance-card">
+              <div class="card-header-info">
+                <div class="student-main">
+                  <div class="avatar-box"><%= iniciais %></div>
+                  <div class="name-zone">
+                    <h4 class="student-card-name"><%= aluna.nome %></h4>
+                    <span>Bailarina Baby</span>
+                  </div>
+                </div>
+                <div class="percentage-zone">
+                  <h3><%= aproveitamento %>%</h3>
+                  <span>Aproveitamento</span>
+                </div>
+              </div>
+              <div class="purple-divider"></div>
+              <div class="stats-grid">
+                <div class="stat-box bg-presenca"><span class="num"><%= aluna.presencias %></span><span class="lab">Presenças</span></div>
+                <div class="stat-box bg-falta"><span class="num"><%= aluna.faltas %></span><span class="lab">Faltas</span></div>
+              </div>
+              <div class="card-footer-custom">
+                <span class="total-aulas">Total de aulas da turma: <%= divisor %></span>
+                <% if (aproveitamento >= 80) { %>
+                  <span class="badge-destaque"><i class="bi bi-trophy"></i> Excelente Frequência</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) } else { %>
+          <div class="col-12">
+            <div class="performance-card p-5 text-center text-muted">
+              <p class="mb-0">Nenhuma aluna encontrada na Turma Baby.</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+
+    <div id="panel-secao-infantil" class="panel-section">
+      <div class="row">
+        <% if (turmaInfantilList.length > 0) { 
+            turmaInfantilList.forEach(aluna => {
+              let totalAulasAluna = aluna.presencias + aluna.faltas;
+              let divisor = totalAulasGeral > 0 ? totalAulasGeral : (totalAulasAluna > 0 ? totalAulasAluna : 1);
+              let aproveitamento = Math.round((aluna.presencias / divisor) * 100);
+              let iniciais = aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        %>
+          <div class="col-lg-6 card-item-container">
+            <div class="performance-card">
+              <div class="card-header-info">
+                <div class="student-main">
+                  <div class="avatar-box"><%= iniciais %></div>
+                  <div class="name-zone">
+                    <h4 class="student-card-name"><%= aluna.nome %></h4>
+                    <span>Bailarina Infantil</span>
+                  </div>
+                </div>
+                <div class="percentage-zone">
+                  <h3><%= aproveitamento %>%</h3>
+                  <span>Aproveitamento</span>
+                </div>
+              </div>
+              <div class="purple-divider"></div>
+              <div class="stats-grid">
+                <div class="stat-box bg-presenca"><span class="num"><%= aluna.presencias %></span><span class="lab">Presenças</span></div>
+                <div class="stat-box bg-falta"><span class="num"><%= aluna.faltas %></span><span class="lab">Faltas</span></div>
+              </div>
+              <div class="card-footer-custom">
+                <span class="total-aulas">Total de aulas da turma: <%= divisor %></span>
+                <% if (aproveitamento >= 80) { %>
+                  <span class="badge-destaque"><i class="bi bi-trophy"></i> Excelente Frequência</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) } else { %>
+          <div class="col-12">
+            <div class="performance-card p-5 text-center text-muted">
+              <p class="mb-0">Nenhuma aluna encontrada na Turma Infantil.</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+  </main>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+    // SISTEMA DE TROCA DE ABAS (FILTRO POR TURMA)
+    document.querySelectorAll('.btn-filter-class').forEach(button => {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('.btn-filter-class').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+
+        document.querySelectorAll('.panel-section').forEach(section => section.classList.remove('active-section'));
+
+        const targetId = this.getAttribute('data-target');
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+          targetSection.classList.add('active-section');
+        }
+      });
+    });
+
+    // SISTEMA DE BUSCA EM TEMPO REAL DINÂMICO POR NOME
+    document.getElementById('input-search').addEventListener('input', function() {
+      const termo = this.value.toLowerCase().trim();
+      
+      // Realiza o filtro apenas nos cards da aba que está ativa na tela
+      const secaoVisivel = document.querySelector('.panel-section.active-section');
+      if (!secaoVisivel) return;
+
+      secaoVisivel.querySelectorAll('.card-item-container').forEach(container => {
+        const nomeAluna = container.querySelector('.student-card-name').innerText.toLowerCase();
+        
+        if (nomeAluna.includes(termo)) {
+          container.style.setProperty('display', 'block', 'important');
+        } else {
+          container.style.setProperty('display', 'none', 'important');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

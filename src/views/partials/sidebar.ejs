@@ -1,0 +1,250 @@
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/dashboard">
+        <i class="bi bi-grid-1x2"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/Aluna">
+        <i class="bi bi-people-fill"></i> <span>Alunas</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/chamada">
+        <i class="bi bi-calendar-check-fill"></i> <span>Chamada</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/campanha">
+        <i class="bi bi-megaphone-fill"></i> <span>Campanha</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/historico">
+        <i class="bi bi-clock-history"></i> <span>Histórico</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/relatorio">
+        <i class="bi bi-bar-chart-line-fill"></i> <span>Relatório</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/qrcode">
+        <i class="bi bi-whatsapp"></i> <span>WhatsApp</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed menuLoad" href="/configuracao">
+        <i class="bi bi-gear-fill"></i> <span>Configuração</span>
+      </a>
+    </li>   
+
+    <li class="nav-item" id="itemInstalar" style="display: none;">
+      <a class="nav-link collapsed" id="btnInstalar" href="javascript:void(0);">
+        <i class="bi bi-download"></i> <span>Instalar App</span>
+      </a>
+    </li>
+
+
+  </ul>
+
+  <a
+    href="/login/sair"
+    class="nav-link collapsed mt-4 d-flex align-items-center text-muted menuLoad"
+    style="padding-left: 20px"
+  >
+    <i class="bi bi-box-arrow-left me-2"></i> <span>Sair da Conta</span>
+  </a>
+
+</aside>
+
+<script>
+  (function () {
+    // 🔴 Detecta VOLTAR do navegador (bfcache)
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted && window.Swal) {
+        Swal.close();
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuLinks = document.querySelectorAll(".menuLoad");
+
+      menuLinks.forEach((link) => {
+        link.addEventListener("click", function (e) {
+          const destination = this.href;
+          if (destination === window.location.href) return;
+
+          e.preventDefault();
+
+          let progress = 0;
+
+          Swal.fire({
+            title: "⏳ Carregando, aguarde...",
+            html: `
+            <div style="font-size:13px;color:#6b7280;margin-bottom:14px;">
+              ✅ Validando informações e preparando o ambiente...
+            </div>
+            <div style="font-weight:600;font-size:14px;">
+              ⏳ <span id="progressValue">0%</span>
+            </div>
+          `,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+
+            // 🎨 FUNDO IGUAL À IMAGEM
+            backdrop: "rgba(15, 23, 42, 0.45)",
+            customClass: {
+              container: "swal-blur-backdrop",
+            },
+
+            didOpen: () => {
+              Swal.showLoading();
+              const progressText = document.getElementById("progressValue");
+
+              const interval = setInterval(() => {
+                if (progress < 95) {
+                  progress++;
+                  progressText.textContent = `${progress}%`;
+                }
+              }, 120);
+            },
+          });
+
+          // 🚀 navegação real
+          window.location.assign(destination);
+        });
+      });
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    // 🔴 Detecta quando o usuário VOLTA pelo navegador
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) {
+        if (window.Swal) {
+          Swal.close(); // fecha loader fantasma
+        }
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuIA = document.getElementById("menuConsultorIA");
+      if (!menuIA) return;
+
+      menuIA.addEventListener("click", function (e) {
+        const destination = this.href;
+
+        // evita reload da mesma página
+        if (destination === window.location.href) return;
+
+        e.preventDefault();
+
+        let progress = 0;
+
+        Swal.fire({
+          title: "🤖 Consultor Inteligente",
+          html: `
+          <div style="
+            font-size:13px;
+            color:#6b7280;
+            line-height:1.6;
+            margin-bottom:14px;
+          ">
+             📊 Estamos analisando seus dados financeiros e
+             gerando insights personalizados com IA.
+          </div>
+
+          <div style="
+            font-weight:600;
+            font-size:14px;
+            color:#111827;
+            letter-spacing:0.4px;
+          ">
+            ⏳ <span id="progressValue">0%</span>
+          </div>
+        `,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          backdrop: "rgba(15, 23, 42, 0.55)",
+          customClass: {
+            container: "swal-blur-backdrop",
+          },
+          didOpen: () => {
+            Swal.showLoading();
+            const progressText = document.getElementById("progressValue");
+
+            const interval = setInterval(() => {
+              if (progress < 95) {
+                progress++;
+                progressText.textContent = `${progress}%`;
+              }
+            }, 120);
+          },
+        });
+
+        // 🚀 navegação correta (sem loop no histórico)
+        window.location.assign(destination);
+      });
+    });
+  })();
+</script>
+
+<script>
+  let deferredPrompt;
+  const itemInstalar = document.getElementById("itemInstalar");
+  const botaoInstalar = document.getElementById("btnInstalar");
+
+  // 1. Captura o evento de instalação do navegador
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Se o site for instalável, exibe o item no menu
+    if (itemInstalar) {
+      itemInstalar.style.setProperty("display", "block", "important");
+    }
+  });
+
+  // 2. Evento de clique
+  if (botaoInstalar) {
+    botaoInstalar.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`Usuário escolheu: ${outcome}`);
+
+      deferredPrompt = null;
+      if (itemInstalar) itemInstalar.style.display = "none";
+    });
+  }
+
+  window.addEventListener("appinstalled", () => {
+    if (itemInstalar) itemInstalar.style.display = "none";
+  });
+
+  // Registro do Service Worker
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => console.log("Service Worker registrado com sucesso!"))
+        .catch((err) => console.log("Erro no SW:", err));
+    });
+  }
+</script>

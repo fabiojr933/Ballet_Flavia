@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  body { background: #f6f9ff; }
+
+  /* Títulos e Header */
+  .dashboard-title h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #012970;
+    margin-bottom: 2px;
+  }
+  .dashboard-title p {
+    color: #899bbd;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* Barra de Busca Estilo Pill */
+  .search-container {
+    background: #fff;
+    border-radius: 50px;
+    padding: 12px 25px;
+    box-shadow: 0 0 20px rgba(1, 41, 112, 0.05);
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  .search-container input {
+    border: none;
+    outline: none;
+    width: 100%;
+    margin-left: 10px;
+    font-size: 14px;
+    color: #899bbd;
+  }
+
+  /* BOTÕES DE FILTRO DE TURMA */
+  .class-filter-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .btn-filter-class {
+    background: #fff;
+    color: #798eb3;
+    border: 2px solid #e0e6ed;
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-filter-class:hover {
+    background: #f0f4ff;
+    color: #4154f1;
+    border-color: #bcd0ff;
+  }
+
+  .btn-filter-class.active {
+    background: #4154f1;
+    color: #fff;
+    border-color: #4154f1;
+    box-shadow: 0 8px 20px rgba(65, 84, 241, 0.2);
+  }
+
+  /* Controle de Visibilidade das Seções */
+  .history-section {
+    display: none;
+  }
+  
+  .history-section.active-section {
+    display: block;
+  }
+
+  /* Card de Data Principal */
+  .presence-date-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 25px rgba(1, 41, 112, 0.08);
+    margin-bottom: 20px;
+  }
+
+  .date-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .date-info-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .icon-calendar-box {
+    width: 48px;
+    height: 48px;
+    background: #4154f1;
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .date-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-text h4 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #012970;
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  .date-text .mt-1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 4px;
+  }
+
+  /* Badges de Resumo */
+  .summary-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .bg-presente-light { background: #e2f6ed; color: #2ecc71; }
+  .bg-falta-light { background: #ffe9e9; color: #e74c3c; }
+
+  /* Card Individual da Aluna */
+  .student-item-card {
+    background: #fff;
+    border: 1px solid #f0f4fb;
+    border-radius: 15px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+  }
+  .student-item-card:hover { border-color: #4154f1; }
+
+  .student-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-initials {
+    width: 35px;
+    height: 35px;
+    background: #eef2ff;
+    color: #4154f1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .student-name {
+    font-weight: 700;
+    color: #444;
+    font-size: 14px;
+  }
+
+  /* Status Pills Convertidas para Botões Interativos */
+  .btn-status-toggle {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .btn-status-toggle.presente { color: #28a745; background: #f0fff4; border: 1px solid #c6f6d5; }
+  .btn-status-toggle.presente:hover { background: #d4edda; }
+  
+  .btn-status-toggle.falta { color: #dc3545; background: #fff5f5; border: 1px solid #fed7d7; }
+  .btn-status-toggle.falta:hover { background: #f8d7da; }
+
+  /* Animação simples de loading no clique */
+  .btn-status-toggle.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Botão Flutuante */
+  .btn-plus-float {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    background: #4154f1;
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(65, 84, 241, 0.3);
+    border: 4px solid #fff;
+    z-index: 10;
+  }
+  
+  .date-header[aria-expanded="false"] .arrow-icon {
+    transform: rotate(-90deg);
+  }
+
+  .arrow-icon {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 576px) {
+    .class-filter-container { flex-direction: column; gap: 8px; }
+    .date-text h4 { font-size: 14px; }
+    .summary-badge { font-size: 9px; padding: 3px 8px; }
+    .student-item-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .btn-status-toggle { width: 100%; justify-content: center; }
+  }
+</style>
+
+<body>
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main" style="position: relative;">
+    
+    <a href="/chamada" class="btn-plus-float">
+      <i class="bi bi-plus-lg"></i>
+    </a>
+
+    <div class="dashboard-title">
+      <h2>Histórico de Presenças</h2>
+      <p>Equipe de Ballet • Listagem por Filtros</p>
+    </div>
+
+    <div class="search-container">
+      <i class="bi bi-search text-primary"></i>
+      <input type="text" id="input-search" placeholder="Filtrar por data específica (AAAA-MM-DD) ou nome...">
+    </div>
+
+    <% 
+      let listaAlunas = [];
+      if (typeof alunas_chamadas !== 'undefined') {
+        listaAlunas = alunas_chamadas;
+      } else if (typeof dados !== 'undefined' && dados.alunas_chamadas) {
+        listaAlunas = dados.alunas_chamadas;
+      }
+
+      if (listaAlunas && listaAlunas.length > 0) {
+        
+        const turmasAgrupadas = {};
+        listaAlunas.forEach(registro => {
+          if (!turmasAgrupadas[registro.turma]) {
+            turmasAgrupadas[registro.turma] = [];
+          }
+          turmasAgrupadas[registro.turma].push(registro);
+        });
+
+        const possuiTurmaBaby = !!turmasAgrupadas['1'];
+        const possuiTurmaInfantil = !!turmasAgrupadas['2'] || Object.keys(turmasAgrupadas).some(k => k !== '1');
+
+        const formatarDataExtenso = (dataString) => {
+          const partes = dataString.split('-');
+          const dataObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+          return dataObjeto.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+        };
+    %>
+
+      <div class="class-filter-container">
+        <% if (possuiTurmaBaby) { %>
+          <button class="btn-filter-class active" data-target="hist-secao-baby">
+            <i class="bi bi-person-hearts"></i> Turma Baby (4/6 anos)
+          </button>
+        <% } %>
+        
+        <% if (possuiTurmaInfantil) { %>
+          <button class="btn-filter-class <%= !possuiTurmaBaby ? 'active' : '' %>" data-target="hist-secao-infantil">
+            <i class="bi bi-stars"></i> Turma Infantil (7/11 anos)
+          </button>
+        <% } %>
+      </div>
+
+
+      <% if (possuiTurmaBaby) { 
+          const registrosBaby = turmasAgrupadas['1'];
+          const datasBaby = {};
+          registrosBaby.forEach(r => {
+            if (!datasBaby[r.data]) datasBaby[r.data] = [];
+            datasBaby[r.data].push(r);
+          });
+      %>
+        <div id="hist-secao-baby" class="history-section active-section">
+          <% Object.keys(datasBaby).sort((a, b) => new Date(b) - new Date(a)).forEach(dataChave => { 
+              const alunasNaData = datasBaby[dataChave];
+              const totalPresentes = alunasNaData.filter(a => a.status.toUpperCase() === 'PRESENTE').length;
+              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE').length;
+              const collapseId = `coll-baby-${dataChave.replace(/-/g, '')}`;
+          %>
+            <div class="presence-date-card mb-3">
+              <div class="date-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#<%= collapseId %>">
+                <div class="date-info-box">
+                  <div class="icon-calendar-box"><i class="bi bi-calendar-event"></i></div>
+                  <div class="date-text">
+                    <h4><%= formatarDataExtenso(dataChave) %></h4>
+                    <small class="text-muted" style="font-size: 11px;">Data ISO: <%= new Date(dataChave).toLocaleDateString('pt-BR') %></small>
+                    <div class="mt-1">
+                      <span class="summary-badge bg-presente-light count-presente"><%= totalPresentes %> Presenças</span>
+                      <span class="summary-badge bg-falta-light count-ausente"><%= totalAusentes %> Faltas</span>
+                    </div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down text-primary fs-5 arrow-icon"></i>
+              </div>
+
+              <div class="collapse mt-4" id="<%= collapseId %>">
+                <div class="row">
+                  <% alunasNaData.forEach(item => { 
+                      let iniciais = item.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      let statusUpper = item.status.toUpperCase();
+                  %>
+                    <div class="col-md-6">
+                      <div class="student-item-card">
+                        <div class="student-profile">
+                          <div class="avatar-initials"><%= iniciais %></div>
+                          <span class="student-name"><%= item.nome %></span>
+                        </div>
+                        
+                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : 'falta' %>" 
+                                data-chamada-id="<%= item.id %>" 
+                                data-status="<%= statusUpper %>">
+                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : 'bi-x-circle-fill' %>"></i>
+                          <span><%= statusUpper %></span>
+                        </button>
+
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+
+      <% 
+        const chavesInfantil = Object.keys(turmasAgrupadas).filter(k => k !== '1');
+        if (chavesInfantil.length > 0) { 
+          const datasInfantil = {};
+          chavesInfantil.forEach(ch => {
+            turmasAgrupadas[ch].forEach(r => {
+              if (!datasInfantil[r.data]) datasInfantil[r.data] = [];
+              datasInfantil[r.data].push(r);
+            });
+          });
+      %>
+        <div id="hist-secao-infantil" class="history-section <%= !possuiTurmaBaby ? 'active-section' : '' %>">
+          <% Object.keys(datasInfantil).sort((a, b) => new Date(b) - new Date(a)).forEach(dataChave => { 
+              const alunasNaData = datasInfantil[dataChave];
+              const totalPresentes = alunasNaData.filter(a => a.status.toUpperCase() === 'PRESENTE').length;
+              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE').length;
+              const collapseId = `coll-infantil-${dataChave.replace(/-/g, '')}`;
+          %>
+            <div class="presence-date-card mb-3">
+              <div class="date-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#<%= collapseId %>">
+                <div class="date-info-box">
+                  <div class="icon-calendar-box"><i class="bi bi-calendar-event"></i></div>
+                  <div class="date-text">
+                    <h4><%= formatarDataExtenso(dataChave) %></h4>
+                    <small class="text-muted" style="font-size: 11px;">Data ISO: <%= dataChave %></small>
+                    <div class="mt-1">
+                      <span class="summary-badge bg-presente-light count-presente"><%= totalPresentes %> Presenças</span>
+                      <span class="summary-badge bg-falta-light count-ausente"><%= totalAusentes %> Faltas</span>
+                    </div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down text-primary fs-5 arrow-icon"></i>
+              </div>
+
+              <div class="collapse mt-4" id="<%= collapseId %>">
+                <div class="row">
+                  <% alunasNaData.forEach(item => { 
+                      let iniciais = item.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      let statusUpper = item.status.toUpperCase();
+                  %>
+                    <div class="col-md-6">
+                      <div class="student-item-card">
+                        <div class="student-profile">
+                          <div class="avatar-initials"><%= iniciais %></div>
+                          <span class="student-name"><%= item.nome %></span>
+                        </div>
+                        
+                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : 'falta' %>" 
+                                data-chamada-id="<%= item.id %>" 
+                                data-status="<%= statusUpper %>">
+                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : 'bi-x-circle-fill' %>"></i>
+                          <span><%= statusUpper %></span>
+                        </button>
+
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+    <% } else { %>
+      <div class="presence-date-card p-5 text-center text-muted">
+        <i class="bi bi-folder-x fs-1 text-secondary mb-2"></i>
+        <p class="mb-0">Nenhum registro de chamada encontrado no histórico.</p>
+      </div>
+    <% } %>
+
+  </main>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+    // CONTROLADOR DE NAVEGAÇÃO DE ABAS
+    document.querySelectorAll('.btn-filter-class').forEach(button => {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('.btn-filter-class').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.history-section').forEach(section => section.classList.remove('active-section'));
+        const targetId = this.getAttribute('data-target');
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) targetSection.classList.add('active-section');
+      });
+    });
+
+    // SISTEMA DE PESQUISA EM TEMPO REAL
+    document.getElementById('input-search').addEventListener('input', function() {
+      const termo = this.value.toLowerCase().trim();
+      const secaoVisivel = document.querySelector('.history-section.active-section');
+      if (!secaoVisivel) return;
+
+      secaoVisivel.querySelectorAll('.presence-date-card').forEach(card => {
+        const conteudo = card.innerText.toLowerCase();
+        card.style.display = conteudo.includes(termo) ? 'block' : 'none';
+      });
+    });
+
+    // SCRIPT DE EDIÇÃO EM TEMPO REAL AO CLICAR NO BOTÃO DE STATUS
+    document.querySelectorAll('.btn-status-toggle').forEach(button => {
+      button.addEventListener('click', async function(e) {
+        e.stopPropagation(); // Impede o colapso do card pai de fechar ao clicar no botão
+        
+        const btn = this;
+        const chamadaId = btn.getAttribute('data-chamada-id');
+        const statusAtual = btn.getAttribute('data-status');
+        
+        // Alterna o novo status localmente antes de enviar
+        const novoStatus = statusAtual === 'PRESENTE' ? 'AUSENTE' : 'PRESENTE';
+        
+        // Adiciona classe de bloqueio temporário
+        btn.classList.add('loading');
+        
+        try {
+          console.log(chamadaId)
+          // Dispara a requisição de atualização para a sua rota back-end
+          const resposta = await fetch(`/chamada/${chamadaId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: novoStatus })
+          });
+
+          if (resposta.ok) {
+            // Atualiza o elemento visual do botão com base no sucesso da alteração
+            btn.setAttribute('data-status', novoStatus);
+            
+            if (novoStatus === 'PRESENTE') {
+              btn.className = 'btn-status-toggle presente';
+              btn.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>PRESENTE</span>';
+            } else {
+              btn.className = 'btn-status-toggle falta';
+              btn.innerHTML = '<i class="bi bi-x-circle-fill"></i><span>AUSENTE</span>';
+            }
+            
+            // ATUALIZA OS CONTADORES DO CARD SUPERIOR (Presenças / Faltas) AUTOMATICAMENTE
+            const cardPai = btn.closest('.presence-date-card');
+            if (cardPai) {
+              const todosBotoesDoCard = cardPai.querySelectorAll('.btn-status-toggle');
+              let presentes = 0;
+              let ausentes = 0;
+              
+              todosBotoesDoCard.forEach(b => {
+                if(b.getAttribute('data-status') === 'PRESENTE') presentes++;
+                else ausentes++;
+              });
+              
+              cardPai.querySelector('.count-presente').textContent = `${presentes} Presenças`;
+              cardPai.querySelector('.count-ausente').textContent = `${ausentes} Faltas`;
+            }
+
+          } else {
+            alert('Não foi possível atualizar o status no servidor. Tente novamente.');
+          }
+        } catch (erro) {
+          console.error('Erro na requisição:', erro);
+          alert('Erro de conexão ao tentar atualizar.');
+        } finally {
+          btn.classList.remove('loading');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

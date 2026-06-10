@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<% 
+  // 1. TEXTOS PADRÃO CASO VENHA DA BASE COMO NULL, VAZIO OU INDEFINIDO
+  const padraoFalta = 
+  `🌸🩰 Olá, {{responsavel}}!
+  Notamos que a aluna **{{nome_aluna}}** não esteve presente na aula de Ballet da **{{turma}}** com a **{{professora}}**. 💖
+
+  Esperamos que esteja tudo bem com ela. ✨ Caso tenha acontecido algo ou precisem de qualquer apoio, estamos à disposição.
+
+  Aguardamos sua bailarina em breve! 🌷🦋💕`;  
+
+  const padraoNiver =  
+  `🎉🩰 Feliz Aniversário, {{nome_aluna}}! 🎂💖
+  Hoje é um dia muito especial! Toda a equipe da **{{turma}}** e a **{{professora}}** desejam a você muita alegria, saúde, amor e sonhos realizados. ✨🌸
+
+  Que seu dia seja tão lindo e encantador quanto os seus passos na dança! 🦋💕
+
+  Parabéns! 🎈🎁`;
+  
+  const padraoHorario =  
+  `🩰✨ Olá, {{responsavel}}!
+
+  Passando para lembrar que hoje é dia de Ballet para a nossa querida aluna **{{nome_aluna}}**. 💖
+
+  A aula da **{{turma}}** será conduzida pela **{{professora}}**, em um momento especial de aprendizado, disciplina e muita dança. 🌸
+  Esperamos vocês com carinho! Procurem chegar alguns minutos antes do horário para que a aula possa começar tranquilamente. ⏰✨
+  
+  Até logo! 🩰💕`;
+
+
+  // Inicializa as variáveis limpas
+  let msgFalta = padraoFalta;
+  let msgNiver = padraoNiver;
+  let msgHorario = padraoHorario;
+
+  // 2. DETECTA AUTOMATICAMENTE SE VEIO ARRAY OU OBJETO DO BACKEND
+  if (typeof dados_config !== 'undefined' && dados_config) {
+      let registro = null;
+      
+      if (Array.isArray(dados_config) && dados_config.length > 0) {
+          registro = dados_config[0]; // Se veio como array [ { ... } ], extrai a primeira posição
+      } else if (typeof dados_config === 'object') {
+          registro = dados_config; // Se já veio como objeto direto
+      }
+
+      // 3. SE ENCONTROU O REGISTRO, VALIDA SE O CONTEÚDO NÃO É NULL OU VAZIO ''
+      if (registro) {
+          if (registro.mensagem_falta && registro.mensagem_falta.trim() !== '') {
+              msgFalta = registro.mensagem_falta;
+          }
+          if (registro.mensagem_aniversario && registro.mensagem_aniversario.trim() !== '') {
+              msgNiver = registro.mensagem_aniversario;
+          }
+          if (registro.mensagem_lembrete_horario && registro.mensagem_lembrete_horario.trim() !== '') {
+              msgHorario = registro.mensagem_lembrete_horario;
+          }
+      }
+  }
+%>
+
+<style>
+  /* CONFIGURAÇÃO PARA O RODAPÉ FICAR EM BAIXO */
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: #f6f9ff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #main {
+    flex: 1;
+    padding: 20px;
+  }
+
+  /* ESTILO DO RODAPÉ */
+  footer#footer {
+    background: #fff;
+    padding: 20px 0;
+    font-size: 14px;
+    border-top: 1px solid #ebeef4;
+    color: #012970;
+    text-align: center;
+  }
+
+  /* CARD E OUTROS ESTILOS */
+  .dashboard-header { margin-bottom: 20px; }
+  .dashboard-title h2 { font-size: 26px; font-weight: 700; color: #012970; }
+  .dashboard-title p { color: #899bbd; font-size: 14px; }
+
+  /* Estrutura dos Cards de Configuração */
+  .config-container-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(1, 41, 112, 0.05);
+    border: 1px solid #ebeef4;
+    max-width: 1050px;
+    margin: 0 auto 30px auto;
+  }
+
+  /* Estilização das abas verticais */
+  .nav-pills-custom .nav-link {
+    color: #798eb3;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    background: #fff;
+    border: 1px solid #e0e6ed;
+  }
+
+  .nav-pills-custom .nav-link:hover {
+    background: #f0f4ff;
+    color: #4154f1;
+  }
+
+  .nav-pills-custom .nav-link.active {
+    background: #4154f1;
+    color: #fff;
+    border-color: #4154f1;
+    box-shadow: 0 4px 12px rgba(65, 84, 241, 0.2);
+  }
+
+  /* Área das Tags / Parâmetros */
+  .param-badge-btn {
+    background: #eef2ff;
+    color: #4154f1;
+    border: 1px dashed #4154f1;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 5px;
+    margin-bottom: 8px;
+  }
+  .param-badge-btn:hover {
+    background: #4154f1;
+    color: #fff;
+  }
+
+  /* Caixa de Textarea de mensagem imitando WhatsApp */
+  .whatsapp-textarea-wrapper {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+  }
+  .whatsapp-textarea-wrapper textarea {
+    border: none;
+    background: transparent;
+    resize: vertical;
+    outline: none;
+    font-size: 14px;
+    color: #444;
+  }
+  .whatsapp-textarea-wrapper textarea:focus {
+    box-shadow: none;
+  }
+
+  .tip-box-whatsapp {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 10px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .tip-box-whatsapp p { margin: 0; color: #0d47a1; font-size: 13px; font-weight: 600; }
+
+  .btn-save-config {
+    background: #4154f1;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 30px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(65, 84, 241, 0.3);
+    transition: all 0.3s;
+  }
+  .btn-save-config:hover {
+    background: #2b3dd4;
+    color: #fff;
+  }
+</style>
+
+<body>
+
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main">
+    <div class="dashboard-header">
+      <div class="dashboard-title">
+        <h2>Configuração de Notificações</h2>
+        <p>Gerencie os modelos de mensagens automáticas disparadas via WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="config-container-card p-4">
+      
+      <% if (typeof mensagem_sucesso !== 'undefined' && mensagem_sucesso) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="bi bi-check-circle me-1"></i> Configurações salvas com sucesso!
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+
+      <form action="/configuracao" method="POST">
+        <div class="row pt-2">
+          
+          <div class="col-md-4 col-lg-3">
+            <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              
+              <button class="nav-link active text-start" id="v-pills-falta-tab" data-bs-toggle="pill" data-bs-target="#v-pills-falta" type="button" role="tab" aria-controls="v-pills-falta" aria-selected="true">
+                <i class="bi bi-person-x-fill"></i> Notificação de Falta
+              </button>
+              
+              <button class="nav-link text-start" id="v-pills-niver-tab" data-bs-toggle="pill" data-bs-target="#v-pills-niver" type="button" role="tab" aria-controls="v-pills-niver" aria-selected="false">
+                <i class="bi bi-cake2-fill"></i> Aniversário
+              </button>
+              
+              <button class="nav-link text-start" id="v-pills-lembrete-tab" data-bs-toggle="pill" data-bs-target="#v-pills-lembrete" type="button" role="tab" aria-controls="v-pills-lembrete" aria-selected="false">
+                <i class="bi bi-clock-fill"></i> Lembrete de Horário
+              </button>
+
+            </div>
+          </div>
+
+          <div class="col-md-8 col-lg-9 ps-md-4">
+            <div class="tab-content" id="v-pills-tabContent">
+              
+              <div class="tab-pane fade show active" id="v-pills-falta" role="tabpanel" aria-labelledby="v-pills-falta-tab">
+                <h4 class="text-primary fw-bold mb-1">Mensagem de Falta</h4>
+                <p class="text-muted small">Esta mensagem será sugerida ou enviada quando for registrada uma ausência na chamada.</p>
+                
+                <div class="mb-2">
+                  <label class="form-label d-block text-secondary fw-bold small">Clique para inserir parâmetros:</label>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_falta', '{{nome_aluna}}')">{{nome_aluna}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_falta', '{{turma}}')">{{turma}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_falta', '{{responsavel}}')">{{responsavel}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_falta', '{{professora}}')">{{professora}}</button>
+                </div>
+
+                <div class="whatsapp-textarea-wrapper">
+                  <textarea class="form-control" id="msg_falta" name="msg_falta" rows="6" placeholder="Olá {{responsavel}}..."><%= msgFalta %></textarea>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="v-pills-niver" role="tabpanel" aria-labelledby="v-pills-niver-tab">
+                <h4 class="text-primary fw-bold mb-1">Mensagem de Aniversário</h4>
+                <p class="text-muted small">Texto padrão para parabenizar as bailarinas no dia do seu aniversário.</p>
+                
+                <div class="mb-2">
+                  <label class="form-label d-block text-secondary fw-bold small">Clique para inserir parâmetros:</label>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_aniversario', '{{nome_aluna}}')">{{nome_aluna}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_aniversario', '{{turma}}')">{{turma}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_aniversario', '{{responsavel}}')">{{responsavel}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_aniversario', '{{professora}}')">{{professora}}</button>
+                </div>
+
+                <div class="whatsapp-textarea-wrapper">
+                  <textarea class="form-control" id="msg_aniversario" name="msg_aniversario" rows="6" placeholder="Parabéns {{nome_aluna}}!..."><%= msgNiver %></textarea>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="v-pills-lembrete" role="tabpanel" aria-labelledby="v-pills-lembrete-tab">
+                <h4 class="text-primary fw-bold mb-1">Lembrete de Horário do Ballet</h4>
+                <p class="text-muted small">Mensagem enviada no início do dia ou horas antes do início programado das aulas.</p>
+                
+                <div class="mb-2">
+                  <label class="form-label d-block text-secondary fw-bold small">Clique para inserir parâmetros:</label>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_horario', '{{nome_aluna}}')">{{nome_aluna}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_horario', '{{turma}}')">{{turma}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_horario', '{{responsavel}}')">{{responsavel}}</button>
+                  <button type="button" class="param-badge-btn" onclick="inserirParametro('msg_horario', '{{professora}}')">{{professora}}</button>
+                </div>
+
+                <div class="whatsapp-textarea-wrapper">
+                  <textarea class="form-control" id="msg_horario" name="msg_horario" rows="6" placeholder="Lembrete de aula..."><%= msgHorario %></textarea>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="tip-box-whatsapp">
+              <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+              <p>Os parâmetros delimitados por <code>{{ }}</code> serão substituídos de forma inteligente pelos dados correspondentes no banco de dados na hora de enviar.</p>
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="submit" class="btn-save-config">
+                <i class="bi bi-file-earmark-check-fill"></i> Salvar Configurações
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; <strong><span>FoxSistemas</span></strong> Todos os direitos reservados.
+    </div>
+  </footer>
+
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+    function inserirParametro(idCampo, parametro) {
+      const textarea = document.getElementById(idCampo);
+      
+      const startPos = textarea.selectionStart;
+      const endPos = textarea.selectionEnd;
+      const textoAtual = textarea.value;
+
+      textarea.value = textoAtual.substring(0, startPos) + parametro + textoAtual.substring(endPos, textoAtual.length);
+
+      textarea.focus();
+      textarea.selectionStart = startPos + parametro.length;
+      textarea.selectionEnd = startPos + parametro.length;
+    }
+  </script>
+
+</body>
+</html>

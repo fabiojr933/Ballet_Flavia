@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  /* ESTRUTURA PARA RODAPÉ FIXO NA BASE */
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body { 
+    background: #f6f9ff; 
+    display: flex; 
+    flex-direction: column; 
+  }
+
+  #main { 
+    padding: 20px; 
+    flex: 1 0 auto; 
+  }
+
+  footer {
+    flex-shrink: 0; 
+  }
+
+  /* Estilização Responsiva dos Cards */
+  .card-management {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 0 25px rgba(1, 41, 112, 0.1);
+    padding: 20px;
+    background: #ffffff;
+  }
+
+  .search-bar-custom {
+    background: #f0f4ff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    width: 100%;
+  }
+
+  .btn-new-student {
+    background-color: #5138ed;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 25px;
+    font-weight: 600;
+    transition: 0.3s;
+    white-space: nowrap;
+  }
+
+  .btn-new-student:hover { background-color: #3f29cc; }
+
+  .table-custom thead th {
+    color: #4154f1;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #f0f4ff;
+    white-space: nowrap;
+  }
+
+  .student-avatar {
+    width: 45px;
+    height: 45px;
+    background: #e0e7ff;
+    color: #4154f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+
+  .member-since { font-size: 11px; color: #899bbd; }
+  .contact-phone { font-size: 12px; color: #899bbd; }
+
+  /* Badges de Nível */
+  .badge-level {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .bg-iniciante { background: #e0f2fe; color: #0369a1; }
+  .bg-intermediario { background: #f3e8ff; color: #7e22ce; }
+  .bg-avancado { background: #e0e7ff; color: #4338ca; }
+
+  /* Modais Corrigidos */
+  .modal-content { 
+    border-radius: 25px; 
+    border: none; 
+    padding: 10px; 
+  }
+  
+  .form-control-custom {
+    background: #f6f9ff;
+    border: 1px solid #dce2ef;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  
+  .btn-delete-confirm {
+    background-color: #ff4d4d;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 30px;
+  }
+
+  /* Ajustes finos para telas pequenas */
+  @media (max-width: 576px) {
+    .main { padding: 15px 10px; }
+    .card-management { padding: 15px; }
+    .btn-new-student { width: 100%; margin-top: 5px; } 
+    .modal-content { padding: 5px; }
+  }
+</style>
+
+<body>
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main">
+    <div class="pagetitle">
+      <h1>Gerenciamento de Alunas</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">Equipe de Ballet</li>
+          <li class="breadcrumb-item active">Turma Ativa</li>
+        </ol>
+      </nav>
+    </div>
+
+    <section class="section">
+      <div class="card card-management">
+        <div class="row g-3 mb-4 align-items-center">
+          <div class="col-12 col-md-8">
+            <input type="text" class="form-control search-bar-custom" id="inputBusca" placeholder="Buscar por aluna.">
+          </div>
+          <div class="col-12 col-md-4 text-md-end text-center">
+            <button class="btn btn-primary btn-new-student" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+              <i class="bi bi-person-plus-fill me-2"></i> Nova Aluna
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-borderless align-middle table-custom">
+            <thead>
+              <tr>
+                <th>Nome da Aluna</th>
+                <th>Responsável pela Aluna</th>
+                <th>Data nascimento</th>
+                <th class="text-center">Turma</th>
+                <th class="text-end">Gestão</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaAlunas">
+              <% if (typeof alunas !== 'undefined' && alunas.length > 0) { %>
+                <% alunas.forEach(aluna => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="student-avatar">
+                          <%= aluna.nome ? aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'AL' %>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark text-nowrap"><%= aluna.nome %></div>
+                          <div class="member-since">MEMBRO: <%= aluna.created_at ? new Date(aluna.created_at).getFullYear() : '2023' %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-bold text-dark text-nowrap"><%= aluna.responsavel || 'Não informado' %></div>
+                      <div class="contact-phone text-nowrap">
+                      <%= aluna.telefone && aluna.telefone.replace(/\D/g, '').length === 10 
+                          ? aluna.telefone.replace(/\D/g, '').replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3') 
+                          : (aluna.telefone || 'Não informado') %>
+                    </div>
+                    </td>
+                    <td>
+                      <div class="fw-bold text-dark text-nowrap">
+                        <%= aluna.data_nascimento ? new Date(aluna.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Não informado' %>
+                      </div>
+                     </td>
+                    <td class="text-center">
+                    <span class="badge-level bg-iniciante">
+                      <%= aluna.turma == 1 ? '4/6 anos' : '7/11 anos' %>
+                    </span>
+                  </td>
+                    <td class="text-end text-nowrap">
+                      <!-- Botão Editar com a data tratada de forma robusta para AAAA-MM-DD -->
+                      <button class="btn btn-light btn-sm text-secondary me-2" 
+                              onclick="editStudent(this)"
+                              data-id="<%= aluna.id %>"
+                              data-nome="<%= aluna.nome %>"
+                              data-nascimento="<%= aluna.data_nascimento ? (aluna.data_nascimento instanceof Date ? aluna.data_nascimento.toISOString().split('T')[0] : new Date(aluna.data_nascimento).toISOString().split('T')[0]) : '' %>"
+                              data-turma="<%= aluna.turma %>"
+                              data-responsavel="<%= aluna.responsavel %>"
+                              data-telefone="<%= aluna.telefone %>">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      
+                      <!-- Botão Excluir atualizado para passar dados dinâmicos ao Modal -->
+                      <button class="btn btn-light btn-sm text-secondary" 
+                              onclick="confirmDelete(this)"
+                              data-id="<%= aluna.id %>"
+                              data-nome="<%= aluna.nome %>">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-5">
+                    <p class="mb-0">Nenhuma aluna cadastrada.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal de Cadastro / Edição -->
+    <div class="modal fade" id="modalCadastro" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold" id="modalTitle" style="color: #5138ed;">Cadastrar Aluna</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formAluna" action="/aluna/salvar" method="POST">
+              
+              <input type="hidden" name="id" id="alunaId">
+
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-primary">NOME DA ALUNA</label>
+                <input type="text" class="form-control form-control-custom" name="nome" id="nomeAluna" required>
+              </div>
+              <div class="row g-3">
+                <div class="col-12 col-sm-6 mb-3">
+                  <label class="form-label small fw-bold text-primary">DATA NASC.</label>
+                  <input type="date" class="form-control form-control-custom" name="data_nascimento" id="data_nascimento">
+                </div>
+                <div class="col-12 col-sm-6 mb-3">
+                  <label class="form-label small fw-bold text-primary">Turma</label>
+                  <select class="form-select form-control-custom" id="turma" name="turma">
+                    <option value="1">4/6 anos</option>
+                    <option value="2">7/11 anos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-primary">RESPONSÁVEL</label>
+                <input type="text" class="form-control form-control-custom" id="responsavel" name="responsavel">
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-primary">WHATSAPP / CELULAR</label>
+                <input type="text" class="form-control form-control-custom" placeholder="(00) 0000-0000" name="telefone" id="telefone">
+              </div>
+              <button type="submit" id="btnSubmitForm" class="btn btn-primary w-100 btn-new-student">Finalizar Cadastro</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Excluir -->
+    <div class="modal fade" id="modalExcluir" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm px-3">
+        <div class="modal-content text-center">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <div style="background: #fff0f0; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="bi bi-trash3 text-danger fs-2"></i>
+              </div>
+            </div>
+            <h4 class="fw-bold">Excluir Aluna?</h4>
+            <p class="text-muted small">Você está prestes a remover <strong id="nomeExcluir"></strong>. Esta ação não pode ser desfeita.</p>
+            <div class="d-flex gap-2 justify-content-center mt-4">
+              <button type="button" class="btn btn-light px-3 w-50" style="border-radius: 12px;" data-bs-dismiss="modal">Cancelar</button>
+              <!-- Link dinâmico ou botão de ação via formulário/JS para a exclusão -->
+              <a href="#" id="lnkExcluirConfirm" class="btn btn-danger btn-delete-confirm w-50 p-2 d-flex align-items-center justify-content-center text-white text-decoration-none">Excluir</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+    function editStudent(button) {
+      const id = button.dataset.id;
+      const nome = button.dataset.nome;
+      const nascimento = button.dataset.nascimento;
+      const turma = button.dataset.turma;
+      const responsavel = button.dataset.responsavel;
+      const telefone = button.dataset.telefone;
+
+      document.getElementById('modalTitle').innerText = 'Editar Aluna';
+      document.getElementById('btnSubmitForm').innerText = 'Salvar Alterações';
+      document.getElementById('formAluna').action = `/aluna/salvar`;
+
+      document.getElementById('alunaId').value = id;
+      document.getElementById('nomeAluna').value = nome;
+      document.getElementById('data_nascimento').value = nascimento;
+      document.getElementById('turma').value = turma;
+      document.getElementById('responsavel').value = responsavel;
+      document.getElementById('telefone').value = telefone;
+
+      var myModal = new bootstrap.Modal(document.getElementById('modalCadastro'));
+      myModal.show();
+    }
+
+    // Nova Função para acionar e customizar o modal de exclusão dinamicamente
+    function confirmDelete(button) {
+      const id = button.dataset.id;
+      const nome = button.dataset.nome;
+
+      document.getElementById('nomeExcluir').innerText = nome;
+      // Define a rota correta para o botão de confirmação de exclusão
+      document.getElementById('lnkExcluirConfirm').href = `/aluna/excluir/${id}`;
+
+      var deleteModal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+      deleteModal.show();
+    }
+
+    document.getElementById('modalCadastro').addEventListener('hidden.bs.modal', function () {
+      document.getElementById('modalTitle').innerText = 'Cadastrar Aluna';
+      document.getElementById('btnSubmitForm').innerText = 'Finalizar Cadastro';
+      document.getElementById('formAluna').action = '/aluna/salvar';
+      document.getElementById('formAluna').reset();
+      document.getElementById('alunaId').value = '';
+    });
+  </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  const inputBusca = document.getElementById("inputBusca");
+  const tabelaAlunas = document.getElementById("tabelaAlunas");
+  
+  // Verifica se os elementos existem na tela para não gerar erros
+  if (inputBusca && tabelaAlunas) {
+    const linhas = tabelaAlunas.getElementsByTagName("tr");
+
+    inputBusca.addEventListener("keyup", function () {
+      // Pega o valor digitado e transforma em minúsculo para ignorar maiúsculas/minúsculas
+      const termoBusca = inputBusca.value.toLowerCase().trim();
+
+      // Percorre todas as linhas da tabela (menos a de "Nenhuma aluna cadastrada")
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        
+        // Se for a linha de aviso de tabela vazia, ignora
+        if (linha.querySelector("td[colspan]")) continue;
+
+        // Captura o texto das duas primeiras colunas (Nome da Aluna e Responsável)
+        const colunaNome = linha.getElementsByTagName("td")[0];
+        const colunaResponsavel = linha.getElementsByTagName("td")[1];
+
+        if (colunaNome && colunaResponsavel) {
+          const textoNome = colunaNome.textContent.toLowerCase();
+          const textoResponsavel = colunaResponsavel.textContent.toLowerCase();
+
+          // Verifica se o termo digitado está presente no nome OU no responsável
+          if (textoNome.includes(termoBusca) || textoResponsavel.includes(termoBusca)) {
+            linha.style.display = ""; // Mostra a linha
+          } else {
+            linha.style.display = "none"; // Oculta a linha
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  const inputTelefone = document.getElementById("telefone");
+  const formAluna = document.getElementById("formAluna");
+
+  if (inputTelefone) {
+    // 1. MÁSCARA EM TEMPO REAL: Transforma o que é digitado em (66) 9953-9490 (10 dígitos)
+    inputTelefone.addEventListener("input", function (e) {
+      let value = e.target.value.replace(/\D/g, ""); // Remove tudo o que não for número
+      
+      // Limita estritamente em 10 dígitos (DDD + 8 dígitos)
+      if (value.length > 10) {
+        value = value.slice(0, 10);
+      }
+
+      // Aplica a formatação visual dinamicamente para 8 dígitos de telefone
+      if (value.length > 6) {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`;
+      } else if (value.length > 2) {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+      } else if (value.length > 0) {
+        e.target.value = `(${value.slice(0, 2)}`;
+      } else {
+        e.target.value = "";
+      }
+    });
+  }
+
+  if (formAluna && inputTelefone) {
+    // 2. RETIRA A MÁSCARA NO ENVIO: Garante que vai salvar exatamente 6699539490
+    formAluna.addEventListener("submit", function (e) {
+      const apenasNumeros = inputTelefone.value.replace(/\D/g, "");
+      
+      // Valida se o campo foi preenchido por completo com os 10 números exigidos
+      if (apenasNumeros.length > 0 && apenasNumeros.length < 10) {
+        e.preventDefault();
+        alert("Por favor, insira o telefone completo com DDD e 8 dígitos (Ex: 6699539490).");
+        inputTelefone.focus();
+        return;
+      }
+
+      // Altera o valor para o formato limpo antes de disparar o POST para o backend
+      inputTelefone.value = apenasNumeros;
+    });
+  }
+});
+</script>
+</body>
+</html>

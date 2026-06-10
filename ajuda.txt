@@ -1,0 +1,10 @@
+npx knex migrate:make nome_da_migration --env dev
+
+npx knex migrate:latest --env dev
+
+npx knex migrate:rollback --env dev
+
+
+npx knex seed:make configuracao_inicial --env dev
+
+npx knex seed:run --env dev
