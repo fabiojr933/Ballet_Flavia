@@ -28,7 +28,6 @@ class ChamadaController {
     async relatorio(req, res) {
         try {
             const dados = await ChamadaServices.relatorio();
-            console.log(dados)
             return res.render('relatorio/index', { dados });
 
         } catch (error) {

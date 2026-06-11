@@ -21,21 +21,25 @@ class AlunaServices {
     }
 
     async enviar(campanha) {
-
         const alunas = await AlunasService.all();
-
+        // guarda o template original
+        const mensagemOriginal = campanha.mensagem;
         for (const aluna of alunas.data) {
 
-            campanha.mensagem = campanha.mensagem
+            const mensagem = mensagemOriginal
                 .replace(/{{nome_aluna}}/g, aluna.nome)
                 .replace(/{{responsavel}}/g, aluna.responsavel)
                 .replace(/{{professora}}/g, 'Prof°: Flavia')
-                .replace(/{{turma}}/g, aluna.turma === '1' ? 'Turma 4/6 anos' : 'Turma 7/11 anos');
+                .replace(/{{turma}}/g, aluna.turma === '1'
+                    ? 'Turma 4/6 anos'
+                    : 'Turma 7/11 anos');
 
-               
             await ProcessarRepositories.enviar_mensagem(
                 aluna,
-                campanha
+                {
+                    ...campanha,
+                    mensagem
+                }
             );
         }
     }

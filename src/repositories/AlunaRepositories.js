@@ -94,7 +94,6 @@ class AlunaRepositories {
                 status: 'ERROR'
             });
 
-            console.error(error.response?.data || error.message);
         }
     }
     async taxaPresenca() {

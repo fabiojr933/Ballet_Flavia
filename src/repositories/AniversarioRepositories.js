@@ -42,7 +42,6 @@ class AniversarioRepositories {
                 status: 'ERROR'
             });
 
-            console.error(error.response?.data || error.message);
         }
     }
 }

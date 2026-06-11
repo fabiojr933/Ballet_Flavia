@@ -16,7 +16,6 @@ async index(req, res) {
     return res.render('configuracao/index', { dados_config });
 
   } catch (error) {
-    console.log(error);
     req.flash('error', 'Erro: ' + error.message);
     return res.redirect('/login');
   }

@@ -3,6 +3,5 @@ module.exports = function authMiddleware(req, res, next) {
         req.flash('info', 'Você precisa estar autenticado para acessar esta página.');
         return res.redirect('/login');
     }
-    console.log(req.session.user)
     return next();
 };

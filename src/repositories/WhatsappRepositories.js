@@ -25,12 +25,7 @@ class WhatsappRepositories {
 
         } catch (error) {
 
-            console.error('Erro ao criar usuário:');
-
             if (error.response) {
-                console.error(error.response.status);
-                console.error(error.response.data);
-
                 throw new Error(error.response.data);
             }
             throw new Error(error.message);
@@ -57,12 +52,7 @@ class WhatsappRepositories {
 
         } catch (error) {
 
-            console.error('Erro ao conectar sessão:');
-
             if (error.response) {
-                console.error(error.response.status);
-                console.error(error.response.data);
-
                 throw new Error(error.response.data);
             }
             throw new Error(error.message);
@@ -86,12 +76,7 @@ class WhatsappRepositories {
 
         } catch (error) {
 
-            console.error('Erro ao obter QR Code:');
-
             if (error.response) {
-                console.error(error.response.status);
-                console.error(error.response.data);
-
                 throw new Error(error.response.data);
             }
             throw new Error(error.message);
@@ -114,13 +99,7 @@ class WhatsappRepositories {
 
 
         } catch (error) {
-
-            console.error('Erro ao obter QR Code:');
-
             if (error.response) {
-                console.error(error.response.status);
-                console.error(error.response.data);
-
                 throw new Error(error.response.data);
             }
             throw new Error(error.message);
@@ -143,13 +122,7 @@ class WhatsappRepositories {
 
 
         } catch (error) {
-
-            console.error('Erro ao obter status');
-
             if (error.response) {
-                console.error(error.response.status);
-                console.error(error.response.data);
-
                 throw new Error(error.response.data);
             }
             throw new Error(error.message);
@@ -169,8 +142,6 @@ async excluirUsuario() {
             }
         );
 
-        console.log('Usuários:', lista.data);
-
         if (!lista.data.success || !lista.data.data?.length) {
             throw new Error('Nenhum usuário encontrado.');
         }
@@ -184,8 +155,6 @@ async excluirUsuario() {
             throw new Error('Usuário Ballet não encontrado.');
         }
 
-        console.log('Usuário encontrado:', usuario);
-
         // Exclui o usuário
         const response = await axios.delete(
             `${process.env.SERVIDOR_ZAP}/admin/users/${usuario.id}`,
@@ -197,18 +166,11 @@ async excluirUsuario() {
             }
         );
 
-        console.log('Usuário excluído:', response.data);
-
         return response.data;
 
     } catch (error) {
 
-        console.error('Erro ao excluir usuário:');
-
         if (error.response) {
-            console.error(error.response.status);
-            console.error(error.response.data);
-
             throw new Error(
                 typeof error.response.data === 'string'
                     ? error.response.data

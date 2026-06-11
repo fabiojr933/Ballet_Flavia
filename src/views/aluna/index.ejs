@@ -196,7 +196,6 @@
                     </span>
                   </td>
                     <td class="text-end text-nowrap">
-                      <!-- Botão Editar com a data tratada de forma robusta para AAAA-MM-DD -->
                       <button class="btn btn-light btn-sm text-secondary me-2" 
                               onclick="editStudent(this)"
                               data-id="<%= aluna.id %>"
@@ -208,7 +207,6 @@
                         <i class="bi bi-pencil"></i>
                       </button>
                       
-                      <!-- Botão Excluir atualizado para passar dados dinâmicos ao Modal -->
                       <button class="btn btn-light btn-sm text-secondary" 
                               onclick="confirmDelete(this)"
                               data-id="<%= aluna.id %>"
@@ -231,7 +229,6 @@
       </div>
     </section>
 
-    <!-- Modal de Cadastro / Edição -->
     <div class="modal fade" id="modalCadastro" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
         <div class="modal-content">
@@ -267,7 +264,7 @@
               </div>
               <div class="mb-4">
                 <label class="form-label small fw-bold text-primary">WHATSAPP / CELULAR</label>
-                <input type="text" class="form-control form-control-custom" placeholder="(00) 0000-0000" name="telefone" id="telefone">
+                <input type="text" class="form-control form-control-custom" placeholder="(00) 0-0000-0000" name="telefone" id="telefone">
               </div>
               <button type="submit" id="btnSubmitForm" class="btn btn-primary w-100 btn-new-student">Finalizar Cadastro</button>
             </form>
@@ -276,7 +273,6 @@
       </div>
     </div>
 
-    <!-- Modal Excluir -->
     <div class="modal fade" id="modalExcluir" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-sm px-3">
         <div class="modal-content text-center">
@@ -290,7 +286,6 @@
             <p class="text-muted small">Você está prestes a remover <strong id="nomeExcluir"></strong>. Esta ação não pode ser desfeita.</p>
             <div class="d-flex gap-2 justify-content-center mt-4">
               <button type="button" class="btn btn-light px-3 w-50" style="border-radius: 12px;" data-bs-dismiss="modal">Cancelar</button>
-              <!-- Link dinâmico ou botão de ação via formulário/JS para a exclusão -->
               <a href="#" id="lnkExcluirConfirm" class="btn btn-danger btn-delete-confirm w-50 p-2 d-flex align-items-center justify-content-center text-white text-decoration-none">Excluir</a>
             </div>
           </div>
@@ -309,7 +304,7 @@
       const nascimento = button.dataset.nascimento;
       const turma = button.dataset.turma;
       const responsavel = button.dataset.responsavel;
-      const telefone = button.dataset.telefone;
+      let telefone = button.dataset.telefone || '';
 
       document.getElementById('modalTitle').innerText = 'Editar Aluna';
       document.getElementById('btnSubmitForm').innerText = 'Salvar Alterações';
@@ -320,19 +315,26 @@
       document.getElementById('data_nascimento').value = nascimento;
       document.getElementById('turma').value = turma;
       document.getElementById('responsavel').value = responsavel;
+
+      // Trata o telefone vindo do banco (10 dígitos) para exibir na nova máscara (11 dígitos com o '9-')
+      const numeros = telefone.replace(/\D/g, "");
+      if (numeros.length === 10) {
+        // Insere o '9' fake após o DDD para visualização do cliente
+        const ddd = numeros.slice(0, 2);
+        const resto = numeros.slice(2);
+        telefone = `(${ddd}) 9-${resto.slice(0, 4)}-${resto.slice(4)}`;
+      }
       document.getElementById('telefone').value = telefone;
 
       var myModal = new bootstrap.Modal(document.getElementById('modalCadastro'));
       myModal.show();
     }
 
-    // Nova Função para acionar e customizar o modal de exclusão dinamicamente
     function confirmDelete(button) {
       const id = button.dataset.id;
       const nome = button.dataset.nome;
 
       document.getElementById('nomeExcluir').innerText = nome;
-      // Define a rota correta para o botão de confirmação de exclusão
       document.getElementById('lnkExcluirConfirm').href = `/aluna/excluir/${id}`;
 
       var deleteModal = new bootstrap.Modal(document.getElementById('modalExcluir'));
@@ -353,22 +355,16 @@
   const inputBusca = document.getElementById("inputBusca");
   const tabelaAlunas = document.getElementById("tabelaAlunas");
   
-  // Verifica se os elementos existem na tela para não gerar erros
   if (inputBusca && tabelaAlunas) {
-    const linhas = tabelaAlunas.getElementsByTagName("tr");
+    const lines = tabelaAlunas.getElementsByTagName("tr");
 
     inputBusca.addEventListener("keyup", function () {
-      // Pega o valor digitado e transforma em minúsculo para ignorar maiúsculas/minúsculas
       const termoBusca = inputBusca.value.toLowerCase().trim();
 
-      // Percorre todas as linhas da tabela (menos a de "Nenhuma aluna cadastrada")
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i];
-        
-        // Se for a linha de aviso de tabela vazia, ignora
+      for (let i = 0; i < lines.length; i++) {
+        const linha = lines[i];
         if (linha.querySelector("td[colspan]")) continue;
 
-        // Captura o texto das duas primeiras colunas (Nome da Aluna e Responsável)
         const colunaNome = linha.getElementsByTagName("td")[0];
         const colunaResponsavel = linha.getElementsByTagName("td")[1];
 
@@ -376,11 +372,10 @@
           const textoNome = colunaNome.textContent.toLowerCase();
           const textoResponsavel = colunaResponsavel.textContent.toLowerCase();
 
-          // Verifica se o termo digitado está presente no nome OU no responsável
           if (textoNome.includes(termoBusca) || textoResponsavel.includes(termoBusca)) {
-            linha.style.display = ""; // Mostra a linha
+            linha.style.display = "";
           } else {
-            linha.style.display = "none"; // Oculta a linha
+            linha.style.display = "none";
           }
         }
       }
@@ -395,18 +390,20 @@
   const formAluna = document.getElementById("formAluna");
 
   if (inputTelefone) {
-    // 1. MÁSCARA EM TEMPO REAL: Transforma o que é digitado em (66) 9953-9490 (10 dígitos)
+    // 1. MÁSCARA EM TEMPO REAL: Formata visualmente para (66) 9-9953-9490 (11 dígitos)
     inputTelefone.addEventListener("input", function (e) {
       let value = e.target.value.replace(/\D/g, ""); // Remove tudo o que não for número
       
-      // Limita estritamente em 10 dígitos (DDD + 8 dígitos)
-      if (value.length > 10) {
-        value = value.slice(0, 10);
+      // Limita em 11 dígitos (DDD + 9 fake + 8 do número original)
+      if (value.length > 11) {
+        value = value.slice(0, 11);
       }
 
-      // Aplica a formatação visual dinamicamente para 8 dígitos de telefone
-      if (value.length > 6) {
-        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`;
+      // Aplica a formatação visual dinamicamente para o padrão (66) 9-9953-9490
+      if (value.length > 7) {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+      } else if (value.length > 3) {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 3)}-${value.slice(3)}`;
       } else if (value.length > 2) {
         e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
       } else if (value.length > 0) {
@@ -418,19 +415,27 @@
   }
 
   if (formAluna && inputTelefone) {
-    // 2. RETIRA A MÁSCARA NO ENVIO: Garante que vai salvar exatamente 6699539490
+    // 2. RETIRA O '9' ADICIONAL NO SUBMIT: Envia exatamente 10 dígitos para o banco (Ex: 6699539490)
     formAluna.addEventListener("submit", function (e) {
-      const apenasNumeros = inputTelefone.value.replace(/\D/g, "");
+      let apenasNumeros = inputTelefone.value.replace(/\D/g, "");
       
-      // Valida se o campo foi preenchido por completo com os 10 números exigidos
-      if (apenasNumeros.length > 0 && apenasNumeros.length < 10) {
-        e.preventDefault();
-        alert("Por favor, insira o telefone completo com DDD e 8 dígitos (Ex: 6699539490).");
-        inputTelefone.focus();
-        return;
+      if (apenasNumeros.length > 0) {
+        // Valida se o cliente digitou os 11 números esperados no visual
+        if (apenasNumeros.length < 11) {
+          e.preventDefault();
+          alert("Por favor, insira o telefone completo com o '9-' indicado (Ex: (66) 9-9953-9490).");
+          inputTelefone.focus();
+          return;
+        }
+
+        // Remove o terceiro dígito (o primeiro 9 após o DDD)
+        // De: 66 9 99539490 -> Para: 66 99539490
+        const ddd = apenasNumeros.slice(0, 2);
+        const numeroSemNoveFake = apenasNumeros.slice(3);
+        apenasNumeros = ddd + numeroSemNoveFake;
       }
 
-      // Altera o valor para o formato limpo antes de disparar o POST para o backend
+      // Atualiza o input com a string de 10 dígitos limpa antes de enviar ao servidor
       inputTelefone.value = apenasNumeros;
     });
   }

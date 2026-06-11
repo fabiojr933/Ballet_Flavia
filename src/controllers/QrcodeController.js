@@ -25,9 +25,6 @@ class QrcodeController {
                 await new Promise(resolve => setTimeout(resolve, 3000));
                 return res.render('qrcode/index', { qrcode: conectar.data.qrcode });
             }
-
-            console.log('status*********************');
-            console.log(status);
             if (status.data.connected === false && status.data.loggedIn === false) {
                 await WhatsappServices.Connect();
                 await new Promise(resolve => setTimeout(resolve, 3000));
@@ -45,7 +42,6 @@ class QrcodeController {
             }
 
         } catch (error) {
-            console.log('Erro no Controller Index:', error.message.data);
             req.flash('error', 'Erro interno: ' + error.message);
             return res.render('error/index');
         }

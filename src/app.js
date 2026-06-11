@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   next();
 });
 
-cron.schedule('0 41 14 * * *', async () => {
+cron.schedule('0 07 09 * * *', async () => {
   console.log('Executou às 14:27 verificando aniversariantes');
   await Aniversario.Verificar();
 });
