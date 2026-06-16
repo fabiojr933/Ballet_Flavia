@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  /* ESTRUTURA PARA RODAPÉ FIXO NA BASE */
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body { 
+    background: #f6f9ff; 
+    display: flex; 
+    flex-direction: column; 
+  }
+
+  #main { 
+    padding: 20px; 
+    flex: 1 0 auto; 
+  }
+
+  footer {
+    flex-shrink: 0; 
+  }
+
+  /* Estilização Responsiva dos Cards */
+  .card-management {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 0 25px rgba(1, 41, 112, 0.1);
+    padding: 20px;
+    background: #ffffff;
+  }
+
+  .search-bar-custom {
+    background: #f0f4ff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    width: 100%;
+  }
+
+  .btn-new-student {
+    background-color: #5138ed;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 25px;
+    font-weight: 600;
+    transition: 0.3s;
+    white-space: nowrap;
+  }
+
+  .btn-new-student:hover { background-color: #3f29cc; }
+
+  .table-custom thead th {
+    color: #4154f1;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #f0f4ff;
+    white-space: nowrap;
+  }
+
+  .student-avatar {
+    width: 45px;
+    height: 45px;
+    background: #e0e7ff;
+    color: #4154f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+
+  .member-since { font-size: 11px; color: #899bbd; }
+  .contact-phone { font-size: 12px; color: #899bbd; }
+
+  /* Badges de Nível */
+  .badge-level {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .bg-iniciante { background: #e0f2fe; color: #0369a1; }
+
+  /* Modais Corrigidos */
+  .modal-content { 
+    border-radius: 25px; 
+    border: none; 
+    padding: 10px; 
+  }
+  
+  .btn-delete-confirm {
+    background-color: #ff4d4d;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 30px;
+  }
+
+  .btn-approve-confirm {
+    background-color: #22c55e;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 30px;
+  }
+
+  /* Ajustes finos para telas pequenas */
+  @media (max-width: 576px) {
+    .main { padding: 15px 10px; }
+    .card-management { padding: 15px; }
+    .btn-new-student { width: 100%; margin-top: 5px; } 
+    .modal-content { padding: 5px; }
+  }
+</style>
+
+<body>
+  <%- include('../partials/header.ejs') %>
+  <%- include('../partials/sidebar.ejs') %>
+
+  <main id="main" class="main">
+    <div class="pagetitle">
+      <h1>Gerenciamento de espera</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">Equipe de Ballet</li>
+          <li class="breadcrumb-item active">Fila de Espera</li>
+        </ol>
+      </nav>
+    </div>
+
+    <section class="section">
+      <div class="card card-management">
+        <div class="row g-3 mb-4 align-items-center">
+          <div class="col-12 col-md-8">
+            <input type="text" class="form-control search-bar-custom" id="inputBusca" placeholder="Buscar por aluna.">
+          </div>
+          <div class="col-12 col-md-4 text-md-end text-center">
+            <a href="/aluna/espera" class="btn btn-primary btn-new-student">
+              <i class="bi bi-person-plus-fill me-2"></i> Link de Inscrição
+            </a>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-borderless align-middle table-custom">
+            <thead>
+              <tr>
+                <th>Nome da Aluna</th>
+                <th>Responsável pela Aluna</th>
+                <th>Data nascimento</th>
+                <th class="text-center">Turma</th>
+                <th class="text-end">Gestão</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaAlunas">
+              <% if (typeof alunas !== 'undefined' && alunas.length > 0) { %>
+                <% alunas.forEach(aluna => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="student-avatar">
+                          <%= aluna.nome ? aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'AL' %>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark text-nowrap"><%= aluna.nome %></div>
+                          <div class="member-since">ENTROU EM: <%= aluna.created_at ? new Date(aluna.created_at).toLocaleDateString('pt-BR') : '2026' %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-bold text-dark text-nowrap"><%= aluna.responsavel || 'Não informado' %></div>
+                      <div class="contact-phone text-nowrap">
+                      <%= aluna.telefone && aluna.telefone.replace(/\D/g, '').length === 10 
+                          ? aluna.telefone.replace(/\D/g, '').replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3') 
+                          : (aluna.telefone || 'Não informado') %>
+                    </div>
+                    </td>
+                    <td>
+                      <div class="fw-bold text-dark text-nowrap">
+                        <%= aluna.data_nascimento ? new Date(aluna.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Não informado' %>
+                      </div>
+                     </td>
+                    <td class="text-center">
+                      <span class="badge-level bg-iniciante">
+                        <%= aluna.turma == 1 ? '4/6 anos' : '7/11 anos' %>
+                      </span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                      <!-- BOTÃO CONFIRMAR MATRÍCULA -->
+                      <button class="btn btn-light btn-sm text-success me-1" 
+                              onclick="abrirModalConfirmar(this)"
+                              data-id="<%= aluna.id %>"
+                              data-nome="<%= aluna.nome %>"
+                              title="Confirmar Matrícula">
+                        <i class="bi bi-check-circle-fill"></i>
+                      </button>
+                      
+                      <!-- BOTÃO REJEITAR/DELETAR -->
+                      <button class="btn btn-light btn-sm text-danger" 
+                              onclick="abrirModalDeletar(this)"
+                              data-id="<%= aluna.id %>"
+                              data-nome="<%= aluna.nome %>"
+                              title="Remover da Espera">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-5">
+                    <p class="mb-0">Nenhuma aluna na fila de espera.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>  
+
+    <!-- MODAL CONFIRMAR MATRÍCULA (POST) -->
+    <div class="modal fade" id="modalConfirmar" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm px-3">
+        <div class="modal-content text-center">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <div style="background: #e6f9ed; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="bi bi-check-circle text-success fs-2"></i>
+              </div>
+            </div>
+            <h4 class="fw-bold">Efetivar Aluna?</h4>
+            <p class="text-muted small">Deseja mover <strong id="nomeConfirmar"></strong> para as turmas ativas?</p>
+            
+            <form action="/aluna/espera/confirmar" method="POST" id="formConfirmarPOST">
+              <input type="hidden" name="id" id="idConfirmarInput">
+              <div class="d-flex gap-2 justify-content-center mt-4">
+                <button type="button" class="btn btn-light px-3 w-50" style="border-radius: 12px;" data-bs-dismiss="modal">Voltar</button>
+                <button type="submit" class="btn btn-success btn-approve-confirm w-50 p-2 text-white">Efetivar</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EXCLUIR FILA DE ESPERA (POST) -->
+    <div class="modal fade" id="modalExcluir" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm px-3">
+        <div class="modal-content text-center">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <div style="background: #fff0f0; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="bi bi-trash3 text-danger fs-2"></i>
+              </div>
+            </div>
+            <h4 class="fw-bold">Excluir Inscrição?</h4>
+            <p class="text-muted small">Você removerá <strong id="nomeExcluir"></strong> da fila. Essa ação não pode ser desfeita.</p>
+            
+            <form action="/aluna/espera/deletar" method="POST" id="formDeletarPOST">
+              <input type="hidden" name="id" id="idExcluirInput">
+              <div class="d-flex gap-2 justify-content-center mt-4">
+                <button type="button" class="btn btn-light px-3 w-50" style="border-radius: 12px;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger btn-delete-confirm w-50 p-2 text-white">Excluir</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <%- include('../partials/footer.ejs') %>
+  <%- include('../partials/script.ejs') %>
+
+<script>
+  // FUNÇÃO QUE PREPARA E ABRE O MODAL DE CONFIRMAÇÃO POST
+  function abrirModalConfirmar(botao) {
+    const id = botao.getAttribute('data-id');
+    const nome = botao.getAttribute('data-nome');
+    
+    document.getElementById('idConfirmarInput').value = id;
+    document.getElementById('nomeConfirmar').textContent = nome;
+    
+    const meuModal = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+    meuModal.show();
+  }
+
+  // FUNÇÃO QUE PREPARA E ABRE O MODAL DE EXCLUSÃO POST
+  function abrirModalDeletar(botao) {
+    const id = botao.getAttribute('data-id');
+    const nome = botao.getAttribute('data-nome');
+    
+    document.getElementById('idExcluirInput').value = id;
+    document.getElementById('nomeExcluir').textContent = nome;
+    
+    const meuModal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+    meuModal.show();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputBusca = document.getElementById("inputBusca");
+    const tabelaAlunas = document.getElementById("tabelaAlunas");
+    
+    if (inputBusca && tabelaAlunas) {
+      const lines = tabelaAlunas.getElementsByTagName("tr");
+
+      inputBusca.addEventListener("keyup", function () {
+        const termoBusca = inputBusca.value.toLowerCase().trim();
+
+        for (let i = 0; i < lines.length; i++) {
+          const linha = lines[i];
+          if (linha.querySelector("td[colspan]")) continue;
+
+          const colunaNome = linha.getElementsByTagName("td")[0];
+          const colunaResponsavel = linha.getElementsByTagName("td")[1];
+
+          if (colunaNome && colunaResponsavel) {
+            const textoNome = colunaNome.textContent.toLowerCase();
+            const textoResponsavel = colunaResponsavel.textContent.toLowerCase();
+
+            if (textoNome.includes(termoBusca) || textoResponsavel.includes(termoBusca)) {
+              linha.style.display = "";
+            } else {
+              linha.style.display = "none";
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

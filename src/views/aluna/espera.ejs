@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head.ejs') %>
+
+<style>
+  body {
+    background: #f6f9ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Container do Formulário Centralizado na Tela */
+  .waitlist-container {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .waitlist-card {
+    background: #ffffff;
+    border-radius: 25px;
+    padding: 35px 40px;
+    box-shadow: 0 10px 30px rgba(1, 41, 112, 0.06);
+    border: none;
+  }
+
+  /* Título Principal */
+  .waitlist-card h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #5d3bf8;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  /* Labels */
+  .form-label-custom {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0066ff;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Inputs Estilizados */
+  .form-control-custom {
+    background-color: #f8faff;
+    border: 1.5px solid #e2eaf8;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 15px;
+    color: #444;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+    outline: none;
+  }
+
+  .form-control-custom:focus {
+    background-color: #fff;
+    border-color: #5d3bf8;
+    box-shadow: 0 0 0 4px rgba(93, 59, 248, 0.1);
+  }
+
+  /* Botão Finalizar Cadastro */
+  .btn-submit-custom {
+    background: #5d3bf8;
+    color: #ffffff;
+    border: none;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(93, 59, 248, 0.2);
+  }
+
+  .btn-submit-custom:hover {
+    background: #4627d9;
+  }
+
+  @media (max-width: 576px) {
+    .waitlist-card {
+      padding: 25px 20px;
+    }
+  }
+</style>
+
+<body>
+
+  <div class="waitlist-container">
+    <div class="waitlist-card">
+      <h2>Cadastrar na Fila de Espera</h2>
+
+      <form action="/aluna/espera/salvar" method="POST" id="formAluna">
+        
+        <div class="mb-4">
+          <label for="nome_aluna" class="form-label-custom">Nome da Aluna</label>
+          <input type="text" class="form-control-custom" id="nome_aluna" name="nome" placeholder="Nome completo da aluna" required>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-6">
+            <label for="data_nasc" class="form-label-custom">Data Nasc.</label>
+            <input type="date" class="form-control-custom" id="data_nasc" name="data_nascimento" required>
+          </div>
+
+          <div class="col-6">
+            <label for="turma_selecionada" class="form-label-custom">Turma</label>
+            <select class="form-control-custom" id="turma_selecionada" name="turma" required style="appearance: none; -webkit-appearance: none;">
+              <option value="" disabled selected>Preencha a data...</option>
+              <option value="1">4/6 anos (Baby)</option>
+              <option value="2">7/11 anos (Infantil)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="responsavel" class="form-label-custom">Responsável</label>
+          <input type="text" class="form-control-custom" id="responsavel" name="responsavel" placeholder="Nome da mãe ou responsável" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="telefone" class="form-label-custom">Whatsapp / Celular</label>
+          <input type="text" class="form-control-custom" id="telefone" name="telefone" placeholder="(00) 0-0000-0000" required>
+        </div>
+
+        <button type="submit" class="btn-submit-custom">Finalizar Cadastro</button>
+
+      </form>
+    </div>
+  </div>
+
+  <%- include('../partials/script.ejs') %>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const inputTelefone = document.getElementById("telefone");
+      const formAluna = document.getElementById("formAluna");
+
+      if (inputTelefone) {
+        inputTelefone.addEventListener("input", function (e) {
+          let value = e.target.value.replace(/\D/g, "");
+          if (value.length > 11) value = value.slice(0, 11);
+
+          if (value.length > 7) {
+            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+          } else if (value.length > 3) {
+            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 3)}-${value.slice(3)}`;
+          } else if (value.length > 2) {
+            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+          } else if (value.length > 0) {
+            e.target.value = `(${value.slice(0, 2)}`;
+          } else {
+            e.target.value = "";
+          }
+        });
+      }
+
+      if (formAluna && inputTelefone) {
+        formAluna.addEventListener("submit", function (e) {
+          let apenasNumeros = inputTelefone.value.replace(/\D/g, "");
+          
+          if (apenasNumeros.length > 0) {
+            if (apenasNumeros.length < 11) {
+              e.preventDefault();
+              alert("Por favor, insira o telefone completo com o '9-' indicado (Ex: (66) 9-9953-9490).");
+              inputTelefone.focus();
+              return;
+            }
+
+            const ddd = apenasNumeros.slice(0, 2);
+            const numeroSemNoveFake = apenasNumeros.slice(3);
+            apenasNumeros = ddd + numeroSemNoveFake;
+          }
+          inputTelefone.value = apenasNumeros;
+        });
+      }
+
+      document.getElementById('data_nasc').addEventListener('change', function() {
+        const dataNasc = new Date(this.value);
+        if (isNaN(dataNasc.getTime())) return;
+
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - dataNasc.getFullYear();
+        const m = hoje.getMonth() - dataNasc.getMonth();
+        
+        if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) {
+          idade--;
+        }
+
+        const selectTurma = document.getElementById('turma_selecionada');
+        if (idade >= 4 && idade <= 6) {
+          selectTurma.value = "1";
+        } else if (idade >= 7) {
+          selectTurma.value = "2";
+        } else {
+          selectTurma.value = "1";
+        }
+      });
+    });
+  </script>
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const campo = document.getElementById('data_nasc');
+    const data = new Date(campo.value);
+    const hoje = new Date();
+
+    hoje.setHours(0, 0, 0, 0);
+
+    if (isNaN(data.getTime())) {
+        e.preventDefault();
+        alert('Informe uma data válida.');
+        campo.focus();
+        return;
+    }
+
+    if (data > hoje) {
+        e.preventDefault();
+        alert('A data de nascimento invalido.');
+        campo.focus();
+        return;
+    }
+});
+</script>
+</body>
+</html>

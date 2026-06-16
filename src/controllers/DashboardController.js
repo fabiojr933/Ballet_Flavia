@@ -8,9 +8,11 @@ class DashboardController {
         try {
 
             const data = await DashboardServices.all();
+            
             const agendado = await DashboardServices.agendadoAll();
             const status = await WhatsappServices.status();
-            const presenca = await AlunaServices.taxaPresenca();          
+            const presenca = await AlunaServices.taxaPresenca();    
+            console.log(presenca)      
             return res.render('dashboard/index', { data, agendado, status: status?.data?.connected || false, presenca });
 
         } catch (error) {

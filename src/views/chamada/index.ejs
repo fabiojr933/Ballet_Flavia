@@ -188,6 +188,12 @@
     box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
   }
 
+  .btn-status.btn-excused.active {
+    background: #0dcaf0;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(13, 202, 240, 0.3);
+  }
+
   .tip-box {
     background: #eef2ff;
     border-radius: 15px;
@@ -283,8 +289,9 @@
                   </div>
                 </div>
                 <div class="status-actions">
-                  <button class="btn-status btn-present" data-student="<%= aluna.id %>" data-status="presente"><i class="bi bi-check-lg"></i></button>
-                  <button class="btn-status btn-absent" data-student="<%= aluna.id %>" data-status="ausente"><i class="bi bi-x-lg"></i></button>
+                  <button class="btn-status btn-present" data-student="<%= aluna.id %>" data-status="presente" title="Presente"><i class="bi bi-check-lg"></i></button>
+                  <button class="btn-status btn-absent" data-student="<%= aluna.id %>" data-status="ausente" title="Ausente"><i class="bi bi-x-lg"></i></button>
+                  <button class="btn-status btn-excused" data-student="<%= aluna.id %>" data-status="atestado" title="Atestado"><i class="bi bi-file-earmark-medical"></i></button>
                 </div>
               </div>
             <% }) %>
@@ -322,8 +329,9 @@
                   </div>
                 </div>
                 <div class="status-actions">
-                  <button class="btn-status btn-present" data-student="<%= aluna.id %>" data-status="presente"><i class="bi bi-check-lg"></i></button>
-                  <button class="btn-status btn-absent" data-student="<%= aluna.id %>" data-status="ausente"><i class="bi bi-x-lg"></i></button>
+                  <button class="btn-status btn-present" data-student="<%= aluna.id %>" data-status="presente" title="Presente"><i class="bi bi-check-lg"></i></button>
+                  <button class="btn-status btn-absent" data-student="<%= aluna.id %>" data-status="ausente" title="Ausente"><i class="bi bi-x-lg"></i></button>
+                  <button class="btn-status btn-excused" data-student="<%= aluna.id %>" data-status="atestado" title="Atestado"><i class="bi bi-file-earmark-medical"></i></button>
                 </div>
               </div>
             <% }) %>
@@ -378,7 +386,7 @@
       });
     });
 
-    // Gerenciamento de clique individual para marcar Verde / Vermelho
+    // Gerenciamento de clique individual para marcar Verde / Vermelho / Azul (Atestado)
     document.querySelectorAll('.btn-status').forEach(button => {
       button.addEventListener('click', function() {
         this.parentElement.querySelectorAll('.btn-status').forEach(btn => btn.classList.remove('active'));

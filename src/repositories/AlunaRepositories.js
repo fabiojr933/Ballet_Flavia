@@ -12,7 +12,7 @@ class AlunaRepositories {
             id: result[0].id,
             ...data
         };
-    }
+    }    
 
     async all() {
         const alunas = await knex('alunas').orderBy('created_at', 'asc');
@@ -102,12 +102,27 @@ class AlunaRepositories {
             .count('id as total')
             .groupBy('status');
 
-        const presentes = Number(resultado.find(x => x.status === 'PRESENTE')?.total || 0);
-        const ausentes = Number(resultado.find(x => x.status === 'AUSENTE')?.total || 0);
+        // 1. Captura as presenças puras
+        const presentes = Number(resultado.find(x => x.status.toUpperCase() === 'PRESENTE')?.total || 0);
 
-        const total = Number(presentes) + Number(ausentes);
+        // 2. Captura os atestados
+        const atestados = Number(resultado.find(x => x.status.toUpperCase() === 'ATESTADO')?.total || 0);
 
-        const taxaPresenca = total > 0 ? ((Number(presentes) / total) * 100).toFixed(2) : '0.00';
+        // 3. Captura e soma as faltas (padrão antigo e novo)
+        const ausentes = Number(resultado.find(x => x.status.toUpperCase() === 'AUSENTE')?.total || 0);
+        const faltas = Number(resultado.find(x => x.status.toUpperCase() === 'FALTA')?.total || 0);
+        const faltasComuns = ausentes + faltas;
+
+        // 4. Agrupa atestados junto com as faltas no total de ausências
+        const totalFaltasEAtendidos = faltasComuns + atestados;
+
+        // 5. O total de aulas é a soma de tudo
+        const totalGeralAulas = presentes + totalFaltasEAtendidos;
+
+        // 6. Calcula a taxa considerando o atestado como peso negativo
+        const taxaPresenca = totalGeralAulas > 0
+            ? ((presentes / totalGeralAulas) * 100).toFixed(2)
+            : '0.00';
 
         return `${taxaPresenca}%`;
     }

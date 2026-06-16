@@ -1,16 +1,15 @@
-const AlunaRepositories = require('../repositories/AlunaRepositories');
+const EsperaRepositories = require('../repositories/EsperaRepositories');
 
-class AlunaServices {
+class EsperaServices {
 
     async all() {
         try {
-            return await AlunaRepositories.all();
+            return await EsperaRepositories.all();
         } catch (error) {
             throw new Error('Erro ao listar alunas: ' + error.message);
 
         }
     }
-
     async save(data) {
         try {
 
@@ -30,37 +29,8 @@ class AlunaServices {
                 throw new Error('Tlefone é obrigatório');
             }
 
-            return await AlunaRepositories.save(data);
+            return await EsperaRepositories.save(data);
 
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async update(id, data) {
-        try {
-            if (!id) {
-                throw new Error('Aluna não informado');
-            }
-            return await AlunaRepositories.update(id, data);
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async delete(id) {
-        try {
-
-            if (!id) {
-                throw new Error('Precisa selecionar uma aluna');
-            }
-
-            const resultado = await AlunaRepositories.delete(id);
-
-            if (!resultado) {
-                throw new Error('Aluna não encontrado');
-            }
-            return resultado;
         } catch (error) {
             throw error;
         }
@@ -70,16 +40,26 @@ class AlunaServices {
         if (!id) {
             throw new Error('Aluna não informado');
         }
-        return await AlunaRepositories.get(id);
-    }
-    
-    async enviar_mensagem_falta(alunas, mensagem) {
-        return await AlunaRepositories.enviar_mensagem_falta(alunas, mensagem);
+        return await EsperaRepositories.get(id);
     }
 
-    async taxaPresenca() {
-        return AlunaRepositories.taxaPresenca();
+    async delete(id) {
+        try {
+
+            if (!id) {
+                throw new Error('Precisa selecionar uma aluna');
+            }
+
+            const resultado = await EsperaRepositories.delete(id);
+
+            if (!resultado) {
+                throw new Error('Aluna não encontrado');
+            }
+            return resultado;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
-module.exports = new AlunaServices();
+module.exports = new EsperaServices();

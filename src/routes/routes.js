@@ -8,6 +8,8 @@ const login = require('../controllers/LoginController');
 const aluna = require('../controllers/AlunaController');
 const chamada = require('../controllers/ChamadaController');
 const configuracao = require('../controllers/ConfiguracaoController');
+const espera = require('../controllers/EsperaController');
+
 
 router.get('/', authMiddleware, dashboard.index);
 
@@ -20,6 +22,15 @@ router.get('/campanha', authMiddleware, campanha.index);
 router.post('/campanha', authMiddleware, campanha.save);
 router.get('/campanha/cancelar/:id', authMiddleware, campanha.cancelar);
 router.get('/campanha/excluir/:id', authMiddleware, campanha.excluir);
+
+//espera
+router.get('/aluna/espera', espera.espera);
+router.get('/espera', espera.index);
+router.post('/aluna/espera/salvar', espera.save);
+router.get('/aluna/aguardando', espera.espera_realizada);
+router.post('/aluna/espera/confirmar', authMiddleware, espera.confirmar);
+router.post('/aluna/espera/deletar', authMiddleware, espera.delete);
+router.post('/aluna/espera/confirmar', authMiddleware, espera.confirmar);
 
 // aluna
 router.get('/aluna', authMiddleware, aluna.index);

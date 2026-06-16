@@ -7,7 +7,8 @@ exports.up = (knex) => {
 
         table.enu('status', [
             'PRESENTE',
-            'AUSENTE'
+            'AUSENTE',
+            'ATESTADO'
         ]).defaultTo('PRESENTE');
 
         table.timestamps(true, true);

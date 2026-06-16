@@ -104,15 +104,16 @@
   }
 
   /* Mini Cards de Status */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
   .stat-box {
-    border-radius: 15px; padding: 15px; text-align: center;
+    border-radius: 15px; padding: 12px 8px; text-align: center;
     display: flex; flex-direction: column; align-items: center;
   }
   .bg-presenca { background: #f0fff4; color: #2ecc71; }
   .bg-falta { background: #fff5f5; color: #e74c3c; }
+  .bg-atestado { background: #e0f7fa; color: #0dcaf0; }
 
-  .stat-box .num { font-size: 20px; font-weight: 800; }
+  .stat-box .num { font-size: 18px; font-weight: 800; }
   .stat-box .lab { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
   /* Footer do Card */
@@ -133,6 +134,7 @@
 
   @media (max-width: 576px) {
     .class-filter-container { flex-direction: column; gap: 8px; }
+    .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   }
 </style>
 
@@ -159,6 +161,7 @@
       <div class="legend d-none d-md-flex">
         <div class="legend-item"><span class="dot" style="background: #2ecc71;"></span> PRESENÇA</div>
         <div class="legend-item"><span class="dot" style="background: #e74c3c;"></span> FALTA</div>
+        <div class="legend-item"><span class="dot" style="background: #0dcaf0;"></span> ATESTADO</div>
       </div>
     </div>
 
@@ -179,7 +182,7 @@
         totalAulasGeral = parseInt(dados.total.total_aulas) || 0;
       }
 
-      // 2. Consolidação: Agrupar e somar os registros repetidos por Aluna
+      // 2. Consolidação: Agrupar e somar os registros repetidos por Aluna (com suporte a ATESTADO e normalização de AUSENTE/FALTA)
       const alunasConsolidadas = {};
 
       arrayChamadas.forEach(item => {
@@ -189,15 +192,20 @@
             nome: item.nome,
             turma: item.turma,
             presencias: 0,
-            faltas: 0
+            faltas: 0,
+            atestados: 0
           };
         }
         
         const qtd = parseInt(item.total) || 0;
-        if (item.status.toUpperCase() === 'PRESENTE') {
+        const statusUpper = item.status.toUpperCase();
+        
+        if (statusUpper === 'PRESENTE') {
           alunasConsolidadas[chave].presencias += qtd;
-        } else if (item.status.toUpperCase() === 'AUSENTE') {
+        } else if (statusUpper === 'AUSENTE' || statusUpper === 'FALTA') {
           alunasConsolidadas[chave].faltas += qtd;
+        } else if (statusUpper === 'ATESTADO') {
+          alunasConsolidadas[chave].atestados += qtd;
         }
       });
 
@@ -228,9 +236,12 @@
       <div class="row">
         <% if (turmaBabyList.length > 0) { 
             turmaBabyList.forEach(aluna => {
-              let totalAulasAluna = aluna.presencias + aluna.faltas;
-              // Se o total geral de aulas da query for zero, usa o total somado dela para evitar divisão por zero
+              // Considera presença + faltas + atestados se o totalGeral for nulo
+              let totalAulasAluna = aluna.presencias + aluna.faltas + aluna.atestados;
               let divisor = totalAulasGeral > 0 ? totalAulasGeral : (totalAulasAluna > 0 ? totalAulasAluna : 1);
+              
+              // O cálculo de aproveitamento comumente desconsidera ou abona o atestado. 
+              // Aqui mantém a base do divisor de aulas dadas.
               let aproveitamento = Math.round((aluna.presencias / divisor) * 100);
               let iniciais = aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         %>
@@ -250,10 +261,13 @@
                 </div>
               </div>
               <div class="purple-divider"></div>
+              
               <div class="stats-grid">
                 <div class="stat-box bg-presenca"><span class="num"><%= aluna.presencias %></span><span class="lab">Presenças</span></div>
                 <div class="stat-box bg-falta"><span class="num"><%= aluna.faltas %></span><span class="lab">Faltas</span></div>
+                <div class="stat-box bg-atestado"><span class="num"><%= aluna.atestados %></span><span class="lab">Atestados</span></div>
               </div>
+
               <div class="card-footer-custom">
                 <span class="total-aulas">Total de aulas da turma: <%= divisor %></span>
                 <% if (aproveitamento >= 80) { %>
@@ -277,7 +291,7 @@
       <div class="row">
         <% if (turmaInfantilList.length > 0) { 
             turmaInfantilList.forEach(aluna => {
-              let totalAulasAluna = aluna.presencias + aluna.faltas;
+              let totalAulasAluna = aluna.presencias + aluna.faltas + aluna.atestados;
               let divisor = totalAulasGeral > 0 ? totalAulasGeral : (totalAulasAluna > 0 ? totalAulasAluna : 1);
               let aproveitamento = Math.round((aluna.presencias / divisor) * 100);
               let iniciais = aluna.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -298,10 +312,13 @@
                 </div>
               </div>
               <div class="purple-divider"></div>
+              
               <div class="stats-grid">
                 <div class="stat-box bg-presenca"><span class="num"><%= aluna.presencias %></span><span class="lab">Presenças</span></div>
                 <div class="stat-box bg-falta"><span class="num"><%= aluna.faltas %></span><span class="lab">Faltas</span></div>
+                <div class="stat-box bg-atestado"><span class="num"><%= aluna.atestados %></span><span class="lab">Atestados</span></div>
               </div>
+
               <div class="card-footer-custom">
                 <span class="total-aulas">Total de aulas da turma: <%= divisor %></span>
                 <% if (aproveitamento >= 80) { %>

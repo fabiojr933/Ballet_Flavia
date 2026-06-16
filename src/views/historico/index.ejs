@@ -150,6 +150,7 @@
   }
   .bg-presente-light { background: #e2f6ed; color: #2ecc71; }
   .bg-falta-light { background: #ffe9e9; color: #e74c3c; }
+  .bg-atestado-light { background: #e0f7fa; color: #0dcaf0; }
 
   /* Card Individual da Aluna */
   .student-item-card {
@@ -202,12 +203,17 @@
     cursor: pointer;
     transition: all 0.2s ease;
     outline: none;
+    min-width: 110px;
+    justify-content: center;
   }
   .btn-status-toggle.presente { color: #28a745; background: #f0fff4; border: 1px solid #c6f6d5; }
   .btn-status-toggle.presente:hover { background: #d4edda; }
   
   .btn-status-toggle.falta { color: #dc3545; background: #fff5f5; border: 1px solid #fed7d7; }
   .btn-status-toggle.falta:hover { background: #f8d7da; }
+
+  .btn-status-toggle.atestado { color: #0dcaf0; background: #f0fcfd; border: 1px solid #bfeefa; }
+  .btn-status-toggle.atestado:hover { background: #d0f7fe; }
 
   /* Animação simples de loading no clique */
   .btn-status-toggle.loading {
@@ -326,7 +332,8 @@
           <% Object.keys(datasBaby).sort((a, b) => new Date(b) - new Date(a)).forEach(dataChave => { 
               const alunasNaData = datasBaby[dataChave];
               const totalPresentes = alunasNaData.filter(a => a.status.toUpperCase() === 'PRESENTE').length;
-              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE').length;
+              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE' || a.status.toUpperCase() === 'FALTA').length;
+              const totalAtestado = alunasNaData.filter(a => a.status.toUpperCase() === 'ATESTADO').length;
               const collapseId = `coll-baby-${dataChave.replace(/-/g, '')}`;
           %>
             <div class="presence-date-card mb-3">
@@ -339,6 +346,7 @@
                     <div class="mt-1">
                       <span class="summary-badge bg-presente-light count-presente"><%= totalPresentes %> Presenças</span>
                       <span class="summary-badge bg-falta-light count-ausente"><%= totalAusentes %> Faltas</span>
+                      <span class="summary-badge bg-atestado-light count-atestado"><%= totalAtestado %> Atestados</span>
                     </div>
                   </div>
                 </div>
@@ -350,6 +358,7 @@
                   <% alunasNaData.forEach(item => { 
                       let iniciais = item.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                       let statusUpper = item.status.toUpperCase();
+                      if(statusUpper === 'FALTA') statusUpper = 'AUSENTE';
                   %>
                     <div class="col-md-6">
                       <div class="student-item-card">
@@ -358,10 +367,10 @@
                           <span class="student-name"><%= item.nome %></span>
                         </div>
                         
-                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : 'falta' %>" 
+                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : (statusUpper === 'ATESTADO' ? 'atestado' : 'falta') %>" 
                                 data-chamada-id="<%= item.id %>" 
                                 data-status="<%= statusUpper %>">
-                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : 'bi-x-circle-fill' %>"></i>
+                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : (statusUpper === 'ATESTADO' ? 'bi-file-earmark-medical-fill' : 'bi-x-circle-fill') %>"></i>
                           <span><%= statusUpper %></span>
                         </button>
 
@@ -391,7 +400,8 @@
           <% Object.keys(datasInfantil).sort((a, b) => new Date(b) - new Date(a)).forEach(dataChave => { 
               const alunasNaData = datasInfantil[dataChave];
               const totalPresentes = alunasNaData.filter(a => a.status.toUpperCase() === 'PRESENTE').length;
-              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE').length;
+              const totalAusentes = alunasNaData.filter(a => a.status.toUpperCase() === 'AUSENTE' || a.status.toUpperCase() === 'FALTA').length;
+              const totalAtestado = alunasNaData.filter(a => a.status.toUpperCase() === 'ATESTADO').length;
               const collapseId = `coll-infantil-${dataChave.replace(/-/g, '')}`;
           %>
             <div class="presence-date-card mb-3">
@@ -404,6 +414,7 @@
                     <div class="mt-1">
                       <span class="summary-badge bg-presente-light count-presente"><%= totalPresentes %> Presenças</span>
                       <span class="summary-badge bg-falta-light count-ausente"><%= totalAusentes %> Faltas</span>
+                      <span class="summary-badge bg-atestado-light count-atestado"><%= totalAtestado %> Atestados</span>
                     </div>
                   </div>
                 </div>
@@ -415,6 +426,7 @@
                   <% alunasNaData.forEach(item => { 
                       let iniciais = item.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                       let statusUpper = item.status.toUpperCase();
+                      if(statusUpper === 'FALTA') statusUpper = 'AUSENTE';
                   %>
                     <div class="col-md-6">
                       <div class="student-item-card">
@@ -423,10 +435,10 @@
                           <span class="student-name"><%= item.nome %></span>
                         </div>
                         
-                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : 'falta' %>" 
+                        <button class="btn-status-toggle <%= statusUpper === 'PRESENTE' ? 'presente' : (statusUpper === 'ATESTADO' ? 'atestado' : 'falta') %>" 
                                 data-chamada-id="<%= item.id %>" 
                                 data-status="<%= statusUpper %>">
-                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : 'bi-x-circle-fill' %>"></i>
+                          <i class="bi <%= statusUpper === 'PRESENTE' ? 'bi-check-circle-fill' : (statusUpper === 'ATESTADO' ? 'bi-file-earmark-medical-fill' : 'bi-x-circle-fill') %>"></i>
                           <span><%= statusUpper %></span>
                         </button>
 
@@ -480,21 +492,23 @@
     // SCRIPT DE EDIÇÃO EM TEMPO REAL AO CLICAR NO BOTÃO DE STATUS
     document.querySelectorAll('.btn-status-toggle').forEach(button => {
       button.addEventListener('click', async function(e) {
-        e.stopPropagation(); // Impede o colapso do card pai de fechar ao clicar no botão
+        e.stopPropagation(); // Impede o card de fechar/abrir
         
         const btn = this;
         const chamadaId = btn.getAttribute('data-chamada-id');
-        const statusAtual = btn.getAttribute('data-status');
+        const statusAtual = btn.getAttribute('data-status').toUpperCase();
         
-        // Alterna o novo status localmente antes de enviar
-        const novoStatus = statusAtual === 'PRESENTE' ? 'AUSENTE' : 'PRESENTE';
+        // Ciclo rotativo de status: PRESENTE -> AUSENTE -> ATESTADO -> PRESENTE
+        let novoStatus = 'PRESENTE';
+        if (statusAtual === 'PRESENTE') {
+          novoStatus = 'AUSENTE';
+        } else if (statusAtual === 'AUSENTE' || statusAtual === 'FALTA') {
+          novoStatus = 'ATESTADO';
+        }
         
-        // Adiciona classe de bloqueio temporário
         btn.classList.add('loading');
         
         try {
-          console.log(chamadaId)
-          // Dispara a requisição de atualização para a sua rota back-end
           const resposta = await fetch(`/chamada/${chamadaId}`, {
             method: 'PUT',
             headers: {
@@ -504,31 +518,41 @@
           });
 
           if (resposta.ok) {
-            // Atualiza o elemento visual do botão com base no sucesso da alteração
             btn.setAttribute('data-status', novoStatus);
             
             if (novoStatus === 'PRESENTE') {
               btn.className = 'btn-status-toggle presente';
               btn.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>PRESENTE</span>';
-            } else {
+            } else if (novoStatus === 'AUSENTE') {
               btn.className = 'btn-status-toggle falta';
               btn.innerHTML = '<i class="bi bi-x-circle-fill"></i><span>AUSENTE</span>';
+            } else if (novoStatus === 'ATESTADO') {
+              btn.className = 'btn-status-toggle atestado';
+              btn.innerHTML = '<i class="bi bi-file-earmark-medical-fill"></i><span>ATESTADO</span>';
             }
             
-            // ATUALIZA OS CONTADORES DO CARD SUPERIOR (Presenças / Faltas) AUTOMATICAMENTE
+            // Recalcula contadores locais do cabeçalho
             const cardPai = btn.closest('.presence-date-card');
             if (cardPai) {
               const todosBotoesDoCard = cardPai.querySelectorAll('.btn-status-toggle');
               let presentes = 0;
               let ausentes = 0;
+              let atestados = 0;
               
               todosBotoesDoCard.forEach(b => {
-                if(b.getAttribute('data-status') === 'PRESENTE') presentes++;
-                else ausentes++;
+                const s = b.getAttribute('data-status').toUpperCase();
+                if (s === 'PRESENTE') presentes++;
+                else if (s === 'AUSENTE' || s === 'FALTA') ausentes++;
+                else if (s === 'ATESTADO') atestados++;
               });
               
-              cardPai.querySelector('.count-presente').textContent = `${presentes} Presenças`;
-              cardPai.querySelector('.count-ausente').textContent = `${ausentes} Faltas`;
+              const txtPresente = cardPai.querySelector('.count-presente');
+              const txtAusente = cardPai.querySelector('.count-ausente');
+              const txtAtestado = cardPai.querySelector('.count-atestado');
+
+              if (txtPresente) txtPresente.textContent = `${presentes} Presenças`;
+              if (txtAusente) txtAusente.textContent = `${ausentes} Faltas`;
+              if (txtAtestado) txtAtestado.textContent = `${atestados} Atestados`;
             }
 
           } else {

@@ -4,8 +4,18 @@ class AlunaController {
 
     async index(req, res) {
         try {
-            const alunas = await AlunaService.all();       
+            const alunas = await AlunaService.all();
             return res.render('aluna/index', { alunas: alunas.data });
+
+        } catch (error) {
+            req.flash('error', 'Erro: ' + error.message);
+            return res.render('error/index');
+        }
+    }
+
+    async espera(req, res) {
+        try {
+            return res.render('aluna/espera', {});
 
         } catch (error) {
             req.flash('error', 'Erro: ' + error.message);
@@ -18,7 +28,7 @@ class AlunaController {
 
             const dados = {
                 nome: req.body.nome,
-                data_nascimento: req.body.data_nascimento,               
+                data_nascimento: req.body.data_nascimento,
                 turma: req.body.turma,
                 responsavel: req.body.responsavel,
                 telefone: req.body.telefone
@@ -38,7 +48,8 @@ class AlunaController {
             req.flash('error', 'Erro ao salvar o plano: ' + error.message);
             return res.redirect('/aluna');
         }
-    }
+    } 
+
 
     async delete(req, res) {
         try {
