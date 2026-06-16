@@ -6,8 +6,7 @@ class EsperaController {
 
     async index(req, res) {
         try {
-            const alunas = await EsperaServices.all();
-            console.log(alunas)
+            const alunas = await EsperaServices.all();         
             return res.render('aluna/aguardando', { alunas: alunas.data });
 
         } catch (error) {
@@ -71,8 +70,7 @@ class EsperaController {
     async confirmar(req, res) {
         try {
             const id = req.body.id;
-            const data = await EsperaServices.get(id);
-            console.log(data)
+            const data = await EsperaServices.get(id);          
             await AlunaServices.save(data);
             await EsperaServices.delete(id);
             req.flash('info', 'Inscrição confirmada com sucesso');

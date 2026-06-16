@@ -11,8 +11,7 @@ class DashboardController {
             
             const agendado = await DashboardServices.agendadoAll();
             const status = await WhatsappServices.status();
-            const presenca = await AlunaServices.taxaPresenca();    
-            console.log(presenca)      
+            const presenca = await AlunaServices.taxaPresenca();                   
             return res.render('dashboard/index', { data, agendado, status: status?.data?.connected || false, presenca });
 
         } catch (error) {

@@ -65,8 +65,7 @@ class ChamadaController {
     async alterarChamada(req, res) {
         try {
             let data = { status: req.body.status };
-            let id = req.params.id;
-            console.log(data, id)
+            let id = req.params.id;         
             await ChamadaServices.update(id, data);
             return res.status(200).send('ok');
         } catch (error) {
